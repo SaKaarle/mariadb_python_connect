@@ -76,30 +76,38 @@ class mainClass():
         args = (machine_id, start_time, end_time, duration, isFault)
         try:
 
-            self.cursor = self.conn.cursor()
+            #self.cursor = self.conn.cursor()
             #print(query, args)
             self.cursor.execute(query,args)
             self.conn.commit()
+            
             time.sleep(0.1)
 
         except mariadb.Error as e:
             print(f"Error connectiong to MariaDB Platform: {e}")
             time.sleep(0.1)
             
+            
+            
         finally:
             with open(jsonBackupFile,'w') as jsonData:
                 #production_times.append(data)
                 jsonData.seek(0)
                 json.dump(production_times,jsonData,indent=5)
-            self.cursor.close()
+            #self.cursor.close()
             
     def tryConnection(self):
 
+
+
+
         try:
-            with open('/home/pi/Desktop/sshVSC/userconf24.json','r') as loginData:
+            with open('/home/pi/Desktop/sshVSC/userconfHome.json','r') as loginData:
                 self.loginSettings = json.load(loginData)
                 try:
                     print("Testing connection to Local MariaDB...")
+                    
+                    #mariadb.connection.ping()
                     self.conn = mariadb.connect(
                     user=self.loginSettings["user"],
                     password=self.loginSettings["password"],
@@ -108,11 +116,14 @@ class mainClass():
                     database=self.loginSettings["database"])
 
                     print("Connection mariadb.connect(): ",self.conn)
+                    
+                    self.conn.auto_reconnect = True
 
                     self.cursor = self.conn.cursor()
+                    print(self.conn.ping)
 
                 except mariadb.Error as e:
-                    raise ConnectionError(f"Error occurred... '{e}' Couldn't connect to MariaDB server. Check connection.\n")
+                    raise ConnectionError(f"Error occurred... '{e}' Couldn't connect to MariaDB server. Check connection.\nPing: ",self.conn.ping)
 
         except IOError as ose:
             print("Virhe, ei pystytä lukemaan tiedostoa...")
@@ -130,6 +141,15 @@ class mainClass():
         Popen([f"mysqldump -u SaKa -p{self.loginSettings['password']} esimDB > /home/pi/Desktop/SQLBU/testidbbackup{buDate}.sql"], stdout=PIPE,shell=True)
         time.sleep(0.1)
 
+    def servuPing(self):
+
+        self.dateTimeNowString = datetime.now()
+        self.dateTimePing =self.dateTimeNowString.strftime("%Y-%m-%d %H:%M:%S")
+        
+        print(f"\nAutomatic ping to server...\nTime: {self.dateTimePing} \n")
+        print(self.conn.ping)
+        self.conn.ping
+
 
     def laserDataRead(self, machine_id, start_time,end_time,duration, isFault):
 
@@ -137,8 +157,11 @@ class mainClass():
         global measuring_started
         
         #Määritetty backup tiedoston ajankohdat
-        schedule.every().day.at("11:30").do(self.backupSQL).run
-        schedule.run_pending()
+        schedule.every().day.at("15:30").do(self.backupSQL).run
+        schedule.every().day.at("15:30").do(self.servuPing).run
+        schedule.every(15).minutes.do(self.servuPing).run
+
+        
 
         try:
             while True:
@@ -217,6 +240,7 @@ class mainClass():
 
                     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
 
+                schedule.run_pending()
                 time.sleep(0.3)
                 
 
