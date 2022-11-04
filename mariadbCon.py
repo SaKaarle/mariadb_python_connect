@@ -2,6 +2,7 @@ import json
 from logging import exception
 from math import prod
 from signal import alarm
+#from sqlite3 import InterfaceError
 import sys
 from typing import final
 import mariadb
@@ -55,7 +56,7 @@ try:
         jsonData.seek(0)
         production_times = json.load(jsonData)
 
-        print(production_times)
+        #print(production_times)
 except json.JSONDecodeError as e:
     print(e)
     pass
@@ -78,6 +79,8 @@ class mainClass():
 
             #self.cursor = self.conn.cursor()
             #print(query, args)
+
+            self.cursor = self.conn.cursor()
             self.cursor.execute(query,args)
             self.conn.commit()
             
@@ -94,34 +97,41 @@ class mainClass():
                 #production_times.append(data)
                 jsonData.seek(0)
                 json.dump(production_times,jsonData,indent=5)
-            #self.cursor.close()
+            print("Cursor Closed. None = Closed:",self.cursor.close(),)
             
     def tryConnection(self):
 
-
-
-
         try:
-            with open('/home/pi/Desktop/sshVSC/userconfHome.json','r') as loginData:
+            with open('/home/pi/Desktop/sshVSC/userconf24.json','r') as loginData:
                 self.loginSettings = json.load(loginData)
                 try:
                     print("Testing connection to Local MariaDB...")
                     
-                    #mariadb.connection.ping()
-                    self.conn = mariadb.connect(
-                    user=self.loginSettings["user"],
-                    password=self.loginSettings["password"],
-                    host=self.loginSettings["host"],
-                    port=self.loginSettings["port"],
-                    database=self.loginSettings["database"])
+                    self.connParams = {
+                        "user":self.loginSettings["user"],
+                        "password":self.loginSettings["password"],
+                        "host":self.loginSettings["host"],
+                        "port":self.loginSettings["port"],
+                        "database":self.loginSettings["database"]}
 
-                    print("Connection mariadb.connect(): ",self.conn)
+                    self.conn = mariadb.connect(**self.connParams)
                     
-                    self.conn.auto_reconnect = True
+                    #ALKUPERÄINEN CONNECTING
+                    # self.conn = mariadb.connect(
+                    # user=self.loginSettings["user"],
+                    # password=self.loginSettings["password"],
+                    # host=self.loginSettings["host"],
+                    # port=self.loginSettings["port"],
+                    # database=self.loginSettings["database"])
 
                     self.cursor = self.conn.cursor()
-                    print(self.conn.ping)
 
+
+                    print("Connection mariadb.connect(): ",self.conn,"\nAuto_reconnect :",self.conn.auto_reconnect)
+                    print("Server open:",self.conn)
+                    print("Server cursor ping: ", self.cursor)
+                    
+                    
                 except mariadb.Error as e:
                     raise ConnectionError(f"Error occurred... '{e}' Couldn't connect to MariaDB server. Check connection.\nPing: ",self.conn.ping)
 
@@ -145,22 +155,36 @@ class mainClass():
 
         self.dateTimeNowString = datetime.now()
         self.dateTimePing =self.dateTimeNowString.strftime("%Y-%m-%d %H:%M:%S")
-        
+        #pinggaus = self.conn.reconnect()
         print(f"\nAutomatic ping to server...\nTime: {self.dateTimePing} \n")
-        print(self.conn.ping)
-        self.conn.ping
+        try:
+            self.connParams = {
+                "user":self.loginSettings["user"],
+                "password":self.loginSettings["password"],
+                "host":self.loginSettings["host"],
+                "port":self.loginSettings["port"],
+                "database":self.loginSettings["database"]}
 
-
+            self.conn = mariadb.connect(**self.connParams)
+            self.cursor = self.conn.cursor()
+            self.conn.commit()
+            print("Cursor Check:",self.cursor,"\nConn Commit:",self.conn.commit())
+        except mariadb.Error as er:
+            print('Unable to ping: ',er)
+        return print(self.conn)
+        
+        #print(self.conn.ping(True))
     def laserDataRead(self, machine_id, start_time,end_time,duration, isFault):
 
         global machine_state
         global measuring_started
         
         #Määritetty backup tiedoston ajankohdat
-        schedule.every().day.at("15:30").do(self.backupSQL).run
-        schedule.every().day.at("15:30").do(self.servuPing).run
-        schedule.every(15).minutes.do(self.servuPing).run
-
+        schedule.every().day.at("14:30").do(self.backupSQL).run
+        schedule.every().day.at("14:30").do(self.servuPing).run
+        schedule.every(2).hours.do(self.servuPing).run
+        schedule.every(30).minutes.do(self.servuPing).run
+        #schedule.every(1).minutes.do(self.servuPing).run
         
 
         try:
