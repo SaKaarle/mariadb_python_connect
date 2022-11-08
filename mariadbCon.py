@@ -97,7 +97,8 @@ class mainClass():
                 #production_times.append(data)
                 jsonData.seek(0)
                 json.dump(production_times,jsonData,indent=5)
-            print("Cursor Closed. None = Closed:",self.cursor.close(),)
+            print("Cursor Check and Closed Cursor:",self.cursor,",",self.cursor.close())
+            #self.cursor.close()
             
     def tryConnection(self):
 
@@ -157,21 +158,24 @@ class mainClass():
         self.dateTimePing =self.dateTimeNowString.strftime("%Y-%m-%d %H:%M:%S")
         #pinggaus = self.conn.reconnect()
         print(f"\nAutomatic ping to server...\nTime: {self.dateTimePing} \n")
-        try:
-            self.connParams = {
-                "user":self.loginSettings["user"],
-                "password":self.loginSettings["password"],
-                "host":self.loginSettings["host"],
-                "port":self.loginSettings["port"],
-                "database":self.loginSettings["database"]}
 
-            self.conn = mariadb.connect(**self.connParams)
-            self.cursor = self.conn.cursor()
-            self.conn.commit()
-            print("Cursor Check:",self.cursor,"\nConn Commit:",self.conn.commit())
+        ### Poistaa connParams ja muut, jättää vain self.cursor & conn.commit()
+
+        try:
+            # self.connParams = {
+            #     "user":self.loginSettings["user"],
+            #     "password":self.loginSettings["password"],
+            #     "host":self.loginSettings["host"],
+            #     "port":self.loginSettings["port"],
+            #     "database":self.loginSettings["database"]}
+
+            #self.conn# = mariadb.connect(**self.connParams)
+            #self.cursor# = self.conn.cursor()
+            #self.conn.commit()
+            print("Self.Conn check:",self.conn,"Cursor Check:",self.cursor,"\nConn Commit:",self.conn.commit())
         except mariadb.Error as er:
             print('Unable to ping: ',er)
-        return print(self.conn)
+        
         
         #print(self.conn.ping(True))
     def laserDataRead(self, machine_id, start_time,end_time,duration, isFault):
