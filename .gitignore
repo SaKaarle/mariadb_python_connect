@@ -5,3 +5,4 @@ userconf24.json
 userconfHome.json
 jsonBackupMachine.json
 __pycache__
+.vscode/launch.json

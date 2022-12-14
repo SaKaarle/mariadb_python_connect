@@ -6,7 +6,7 @@ from signal import alarm
 import sys
 from typing import final
 import mariadb
-#from pprint3x import pprint
+from pprint3x import pprint
 import RPi.GPIO as GPIO
 from datetime import datetime
 import time
@@ -56,20 +56,11 @@ try:
         jsonData.seek(0)
         production_times = json.load(jsonData)
 
-        #print(production_times)
 except json.JSONDecodeError as e:
     print(e)
     pass
 
 class mainClass():
-
-    
-            
-
-    #return production_times,jsonBackupFile
-
-#production_times, jsonBackupFile = jsonBackup()
-
 
     def dataSendDb(self,machine_id, start_time, end_time, duration,isFault):
         query = "INSERT INTO laserdata (machine_id, start_time, end_time, duration, isFault) " \
@@ -77,65 +68,49 @@ class mainClass():
         args = (machine_id, start_time, end_time, duration, isFault)
         try:
 
-            #print(query, args)
-            #print(self.conn)
-            print(self.conn.reconnect())
-            print(self.conn.ping())
             self.cursor = self.conn.cursor()
-            #print("Cursor Closed:",self.cursor.closed)
-            #print("self.cursor = self.conn.cursor()",self.cursor)
             self.cursor.execute(query,args)
-            #print("self.cursor.execute(query,args)",self.cursor.execute(query,args))
             self.conn.commit()
-            #print("self.conn.commit()",self.conn.commit())
+            
             time.sleep(0.1)
 
         except mariadb.Error as e:
             print(f"Error connectiong to MariaDB Platform: {e}")
             time.sleep(0.1)
             
-            
-            
         finally:
             with open(jsonBackupFile,'w') as jsonData:
-                #production_times.append(data)
                 jsonData.seek(0)
                 json.dump(production_times,jsonData,indent=5)
-            #print("Cursor Closed:",self.cursor.closed)
-            self.conn.commit()
+            #print("Cursor Check and Closed Cursor:",self.cursor,",",self.cursor.close())
+            self.cursor
             self.cursor.close()
-            print("Cursor Closed:",self.cursor.closed)
-            
             
     def tryConnection(self):
 
         try:
-            with open('/home/pi/Desktop/sshVSC/userconf24.json','r') as loginData:
+            with open('/home/pi/Desktop/sshVSC/userconfHome.json','r') as loginData:
                 self.loginSettings = json.load(loginData)
                 try:
                     print("Testing connection to Local MariaDB...")
                     
-                    # self.connParams = {
-                    #     "user":self.loginSettings["user"],
-                    #     "password":self.loginSettings["password"],
-                    #     "host":self.loginSettings["host"],
-                    #     "port":self.loginSettings["port"],
-                    #     "database":self.loginSettings["database"]}
-                    # self.conn = mariadb.connect(**self.connParams)
+                    self.connParams = {
+                        "user":self.loginSettings["user"],
+                        "password":self.loginSettings["password"],
+                        "host":self.loginSettings["host"],
+                        "port":self.loginSettings["port"],
+                        "database":self.loginSettings["database"]}
+
+                    self.conn = mariadb.connect(**self.connParams)
                     
-                    #ALKUPERÄINEN CONNECTING
-                    self.conn = mariadb.connect(
-                        user=self.loginSettings["user"],
-                        password=self.loginSettings["password"],
-                        host=self.loginSettings["host"],
-                        port=self.loginSettings["port"],
-                        database=self.loginSettings["database"])
-                    print(self.conn)
-                    self.conn.auto_reconnect = True
-                    print(self.conn.auto_reconnect)
                     self.cursor = self.conn.cursor()
-                    self.cursor.close()
-                    print("Cursor closed...",self.cursor.closed)
+                    self.conn.auto_reconnect
+                    print("Cursor closed...", self.cursor.close())
+
+                    #print("Connection mariadb.connect(): ",self.conn,"\nAuto_reconnect :",self.conn.auto_reconnect)
+                    #print("Server open:",self.conn)
+                    #print("Server cursor ping: ", self.cursor)
+                    #print("Cursor closed...", self.cursor.close())
                     
                     
                 except mariadb.Error as e:
@@ -160,34 +135,18 @@ class mainClass():
     def servuPing(self):
 
         self.dateTimeNowString = datetime.now()
-        self.dateTimePing =self.dateTimeNowString.strftime("%Y-%m-%d %H:%M:%S")
-        #pinggaus = self.conn.reconnect()
+        self.dateTimePing = self.dateTimeNowString.strftime("%Y-%m-%d %H:%M:%S")
+
         print(f"\nAutomatic ping to server...\nTime: {self.dateTimePing} \n")
 
-        ### Poistaa connParams ja muut, jättää vain self.cursor & conn.commit()
 
         try:
-            self.conn.cursor()
-            # self.connParams = {
-            #     "user":self.loginSettings["user"],
-            #     "password":self.loginSettings["password"],
-            #     "host":self.loginSettings["host"],
-            #     "port":self.loginSettings["port"],
-            #     "database":self.loginSettings["database"]}
-
-            #self.conn# = mariadb.connect(**self.connParams)
-            #self.cursor# = self.conn.cursor()
-            #self.conn.commit()
-            #self.conn
             self.conn
             self.cursor
             self.conn.commit()
-
-            
+            #print("Self.Conn check:",self.conn,"Cursor Check:",self.cursor,"\nConn Commit:",self.conn.commit())
         except mariadb.Error as er:
             print('Unable to ping: ',er)
-        finally:
-            self.cursor.close()
         
         
         #print(self.conn.ping(True))
@@ -197,12 +156,9 @@ class mainClass():
         global measuring_started
         
         #Määritetty backup tiedoston ajankohdat
-        schedule.every().day.at("14:30").do(self.backupSQL).run
-        schedule.every().day.at("14:30").do(self.servuPing).run
-        schedule.every(4).hours.do(self.servuPing).run
-        #schedule.every(30).minutes.do(self.servuPing).run
-        #schedule.every(1).minutes.do(self.servuPing).run
-        
+        schedule.every().day.at("23:00").do(self.backupSQL).run
+        schedule.every().day.at("16:00").do(self.servuPing).run
+
 
         try:
             while True:
@@ -249,8 +205,8 @@ class mainClass():
                     measuring_started = False
                     
                     print("\nMachine data:")
-                    for datakey, datavalue in data.items():
-                        print(datakey,":",datavalue)
+                    pprint(data)
+                    print("")
                     time.sleep(0.1)
 
                     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)                   
@@ -277,8 +233,8 @@ class mainClass():
                     }
                     production_times.append(data)
                     print("\nMachine Data:")
-                    for datakey, datavalue in data.items():
-                        print(datakey,":",datavalue)
+                    pprint(data)
+                    print("")
                     time.sleep(0.1)
 
                     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
@@ -292,11 +248,9 @@ class mainClass():
             print("------------------")
             print("Production times:")
             #print(type(production_times))
-            for DataItem in production_times:
-                print(DataItem)
-            
-            
-            print(json.dumps(production_times,indent=5))
+            #for DataItem in production_times:
+                #pprint(DataItem)
+            #print(json.dumps(production_times,indent=5))
 
 
     def main(self):
