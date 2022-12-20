@@ -114,14 +114,18 @@ hostname –I
 Selaimeen voidaan syöttää osoite `http://192.168.0.21/phpmyadmin` ja PHPMyAdmin kirjautumisvalikko pitäisi avautua.
 
 ## SystemD startup konfigurointi
-
+```
+sudo apt install libsystemd-dev
+```
 Komento, jolla luodaan "Service"
 ```
 sudo nano /lib/systemd/system/rasplaser.service 
 ```
+Tiedostoon rasplaser.service lisätään seuraavat komennot:
 ```
 [Unit]
 #Human readable name of the unit
+#[Service] osissa on Restart=on-failure joka varmistaa uudelleen käynnistyksen virheen myötä
 Description=Python Script LaserMachine
 After=multi-user.target
 
@@ -129,21 +133,39 @@ After=multi-user.target
 User=pi
 Type=idle
 ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
+#Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 ```
  
+Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
+ 
 CTRL - X ja Y ja Enter. Tiedostoon tehdyt muutokset tallennetaan.
  
-Terminaaliin kirjoitettu `sudo systemctl enable rasplaser` voidaan aktivoida luotu palvelu käynnistykseen.
+Oikeudet lukea service käynnistyessä:
+
+```
+sudo chmod 755 /home/pi/Desktop/sshVSC/
+
+sudo chmod 644 /lib/systemd/system/rasplaser.service
+```
+
 Terminaaliin on syötettävä `sudo systemctl daemon-reload` virkistääkseen käynnistyskomennot Raspberry:stä
 
 ```
-sudo systemctl enable rasplaser
 sudo systemctl daemon-reload
+sudo systemctl enable rasplaser
+sudo systemctl start rasplaser
+
 ```
  
+Terminaaliin kirjoitettu `sudo systemctl enable rasplaser` voidaan aktivoida luotu palvelu käynnistykseen.
+```
+$ sudo systemctl enable rasplaser
+Created symlink /etc/systemd/system/multi-user.target.wants/rasplaser.service → /lib/systemd/system/rasplaser.service.
+
+```
 Terminaaliin kirjoitettuna `sudo systemctl status rasplaser` nähdään, onko service aktiivinen
  
 ```
