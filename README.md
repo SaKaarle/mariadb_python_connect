@@ -136,9 +136,12 @@ WantedBy=multi-user.target
  
 CTRL - X ja Y ja Enter. Tiedostoon tehdyt muutokset tallennetaan.
  
-Terminaaliin kirjoitettu `sudo systemctl restart rasplaser` voidaan käynnistää uudelleen luotu palvelu
+Terminaaliin kirjoitettu `sudo systemctl enable rasplaser` voidaan aktivoida luotu palvelu käynnistykseen.
+Terminaaliin on syötettävä `sudo systemctl daemon-reload` virkistääkseen käynnistyskomennot Raspberry:stä
+
 ```
-sudo systemctl restart rasplaser
+sudo systemctl enable rasplaser
+sudo systemctl daemon-reload
 ```
  
 Terminaaliin kirjoitettuna `sudo systemctl status rasplaser` nähdään, onko service aktiivinen
@@ -156,3 +159,4 @@ rasplaser.service - Python Script LaserMachine
 Dec 20 18:21:37 rpam systemd[1]: Started Python Script LaserMachine.
 
 ```
+Suorittamalla tämän jälkeen `sudo reboot -h now` voidaan uudelleen käynnistyksen jälkeen kytkimiä aktivoimalla nähdä esim. HeidiSQL sovelluksella muutokset tietokantaan. Tai pöytäkoneella kirjautumalla PHPMyAdmin sivustolle tietokannalle oikeutetulle käyttäjätilille.
