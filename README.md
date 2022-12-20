@@ -135,3 +135,24 @@ WantedBy=multi-user.target
 ```
  
 CTRL - X ja Y ja Enter. Tiedostoon tehdyt muutokset tallennetaan.
+ 
+Terminaaliin kirjoitettu `sudo systemctl restart rasplaser` voidaan käynnistää uudelleen luotu palvelu
+```
+sudo systemctl restart rasplaser
+```
+ 
+Terminaaliin kirjoitettuna `sudo systemctl status rasplaser` nähdään, onko service aktiivinen
+ 
+```
+rasplaser.service - Python Script LaserMachine
+     Loaded: loaded (/lib/systemd/system/rasplaser.service; disabled; vendor pr>
+     Active: active (running) since Tue 2022-12-20 18:21:37 EET; 3s ago
+   Main PID: 29502 (python)
+      Tasks: 1 (limit: 8986)
+        CPU: 134ms
+     CGroup: /system.slice/rasplaser.service
+             └─29502 /usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
+
+Dec 20 18:21:37 rpam systemd[1]: Started Python Script LaserMachine.
+
+```
