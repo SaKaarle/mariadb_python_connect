@@ -122,24 +122,26 @@ Komento, jolla luodaan "Service"
 sudo nano /lib/systemd/system/rasplaser.service 
 ```
 Tiedostoon rasplaser.service lisätään seuraavat komennot:
+
 ```
 [Unit]
-#Human readable name of the unit
-#[Service] osissa on Restart=on-failure joka varmistaa uudelleen käynnistyksen virheen myötä
+##Human readable name of the unit
 Description=Python Script LaserMachine
 After=multi-user.target
 
 [Service]
-User=pi
+User=root
 Type=idle
 ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
-#Restart=on-failure
+WorkingDirectory=/home/pi/Desktop/sshVSC
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 ```
  
 Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
+Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja ´WorkingDirectory=/home/pi/jokinsijainti´ saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää ´chmod 755´ tai muista oikeuksien lisäämisestä.
  
 CTRL - X ja Y ja Enter. Tiedostoon tehdyt muutokset tallennetaan.
  
