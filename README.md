@@ -127,14 +127,15 @@ Tiedostoon rasplaser.service lisätään seuraavat komennot:
 [Unit]
 ##Human readable name of the unit
 Description=Python Script LaserMachine
-After=multi-user.target
+After=network.target multi-user.target
 
 [Service]
-User=root
+#User=root
 Type=idle
-ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
+ExecStart=/usr/bin/python3 -u /home/pi/Desktop/sshVSC/mariadbCon.py
 WorkingDirectory=/home/pi/Desktop/sshVSC
 Restart=on-failure
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
@@ -143,6 +144,9 @@ WantedBy=multi-user.target
 Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
 Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja ´WorkingDirectory=/home/pi/jokinsijainti´ saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää ´chmod 755´ tai muista oikeuksien lisäämisestä.
  
+Viimeisimmässä muokkauksessani löysin mahdollisen syyn, miksei ´rasplaser.service´ lähtenyt käyntiin. `After=network.target` viivästyttää vielä Python skriptin aktivoinnin, että MariaDB / MySQL Service pystyvät aktivoitumaan. ´sudo systemctl status rasplaser´ antoi virheeksi, ettei kykenyt lukemaan MariaDB .json tiedosta, jossa on kirjautumistiedot.
+ 
+
 CTRL - X ja Y ja Enter. Tiedostoon tehdyt muutokset tallennetaan.
  
 Oikeudet lukea service käynnistyessä:
