@@ -142,7 +142,7 @@ WantedBy=multi-user.target
 ```
  
 Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
-Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja ´WorkingDirectory=/home/pi/jokinsijainti´ saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää ´chmod 755´ tai muista oikeuksien lisäämisestä.
+Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja `WorkingDirectory=/home/pi/jokinsijainti` saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää `chmod 755` tai muista oikeuksien lisäämisestä.
  
 Viimeisimmässä muokkauksessani löysin mahdollisen syyn, miksei ´rasplaser.service´ lähtenyt käyntiin. `After=network.target` viivästyttää vielä Python skriptin aktivoinnin, että MariaDB / MySQL Service pystyvät aktivoitumaan. ´sudo systemctl status rasplaser´ antoi virheeksi, ettei kykenyt lukemaan MariaDB .json tiedosta, jossa on kirjautumistiedot.
  
