@@ -114,24 +114,77 @@ hostname –I
 Selaimeen voidaan syöttää osoite `http://192.168.0.21/phpmyadmin` ja PHPMyAdmin kirjautumisvalikko pitäisi avautua.
 
 ## SystemD startup konfigurointi
-
+```
+sudo apt install libsystemd-dev
+```
 Komento, jolla luodaan "Service"
 ```
 sudo nano /lib/systemd/system/rasplaser.service 
 ```
+Tiedostoon rasplaser.service lisätään seuraavat komennot:
+
 ```
 [Unit]
-#Human readable name of the unit
+##Human readable name of the unit
 Description=Python Script LaserMachine
-After=multi-user.target
+After=network.target multi-user.target
 
 [Service]
-User=pi
+#User=root
 Type=idle
-ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
+ExecStart=/usr/bin/python3 -u /home/pi/Desktop/sshVSC/mariadbCon.py
+WorkingDirectory=/home/pi/Desktop/sshVSC
+Restart=on-failure
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
 ```
  
+Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
+Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja `WorkingDirectory=/home/pi/jokinsijainti` saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää `chmod 755` tai muista oikeuksien lisäämisestä.
+ 
+Viimeisimmässä muokkauksessani löysin mahdollisen syyn, miksei `rasplaser.service` lähtenyt käyntiin. `After=network.target` viivästyttää vielä Python skriptin aktivoinnin, että MariaDB / MySQL Service pystyvät aktivoitumaan. `sudo systemctl status rasplaser` antoi virheeksi, ettei kykenyt lukemaan MariaDB .json tiedosta, jossa on kirjautumistiedot.
+ 
+
 CTRL - X ja Y ja Enter. Tiedostoon tehdyt muutokset tallennetaan.
+ 
+Oikeudet lukea service käynnistyessä:
+
+```
+sudo chmod 755 /home/pi/Desktop/sshVSC/
+
+sudo chmod 644 /lib/systemd/system/rasplaser.service
+```
+
+Terminaaliin on syötettävä `sudo systemctl daemon-reload` virkistääkseen käynnistyskomennot Raspberry:stä
+
+```
+sudo systemctl daemon-reload
+sudo systemctl enable rasplaser
+sudo systemctl start rasplaser
+
+```
+ 
+Terminaaliin kirjoitettu `sudo systemctl enable rasplaser` voidaan aktivoida luotu palvelu käynnistykseen.
+```
+$ sudo systemctl enable rasplaser
+Created symlink /etc/systemd/system/multi-user.target.wants/rasplaser.service → /lib/systemd/system/rasplaser.service.
+
+```
+Terminaaliin kirjoitettuna `sudo systemctl status rasplaser` nähdään, onko service aktiivinen
+ 
+```
+rasplaser.service - Python Script LaserMachine
+     Loaded: loaded (/lib/systemd/system/rasplaser.service; disabled; vendor pr>
+     Active: active (running) since Tue 2022-12-20 18:21:37 EET; 3s ago
+   Main PID: 29502 (python)
+      Tasks: 1 (limit: 8986)
+        CPU: 134ms
+     CGroup: /system.slice/rasplaser.service
+             └─29502 /usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
+
+Dec 20 18:21:37 rpam systemd[1]: Started Python Script LaserMachine.
+
+```
+Suorittamalla tämän jälkeen `sudo reboot -h now` voidaan uudelleen käynnistyksen jälkeen kytkimiä aktivoimalla nähdä esim. HeidiSQL sovelluksella muutokset tietokantaan. Tai pöytäkoneella kirjautumalla PHPMyAdmin sivustolle tietokannalle oikeutetulle käyttäjätilille.
