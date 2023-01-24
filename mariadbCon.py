@@ -180,8 +180,9 @@ class mainClass():
         global measuring_started
         
         #Määritetty backup tiedoston ajankohdat
-        schedule.every().day.at("14:30").do(self.backupSQL).run
-        #schedule.every().day.at("14:30").do(self.servuPing).run
+        schedule.every().day.at("12:00").do(self.backupSQL).run
+        schedule.every().day.at("12:00").do(self.servuPing).run
+        schedule.every().sunday.at("12:00").do(self.backupSQL).run
         schedule.every(4).hours.do(self.servuPing).run
         #schedule.every(30).minutes.do(self.servuPing).run
         #schedule.every(1).minutes.do(self.servuPing).run
