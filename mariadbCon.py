@@ -250,7 +250,7 @@ class mainClass():
 # Laser logiikka
 #================================================================
 
-    def laserDataRead(self, machine_id, start_time,end_time,duration, isFault):
+    def laserDataRead(self, machine_id, start_time, end_time, duration, isFault):
 
         global machine_state
         global measuring_started
@@ -285,50 +285,50 @@ class mainClass():
                     machine_state = MACHINE_STATE_IDLE
                 
                 # elif machine_state == MACHINE_STATE_STANDBY:
-                #     kakka = "💩"
-                #     print("sheeeesh 😎")
-                #     machine_state = 0
-                #     if kakka == kakka:
-                #         print("😲")
+                #
 
                 # machine standby and waiting for commmand
-                elif power_on == True and standby == True and laser == False and standby_measuring_started == False and machine_state != MACHINE_STATE_STANDBY:
+                elif power_on == True and standby == True and laser == False and machine_state != MACHINE_STATE_STANDBY:
                     print("Machine is standby and waiting...")
                     machine_state = MACHINE_STATE_STANDBY
-                    print("Testi, katsotaan laskeeko aikaa...")
-                    start_time = datetime.now()
+                    #print("Testi, katsotaan laskeeko aikaa...")
+                    #start_time = datetime.now()
+                    #print("Standby keruu aika: ",start_time)
                     isFault = True
                     standby_measuring_started = True
                     measuring_started == False
+
+                # elif power_on == True and standby == True and laser == False and standby_measuring_started == False and machine_state != MACHINE_STATE_STANDBY:
+                #     print("yes")
 
                 # machine state laser on, production running
                 elif power_on == True and standby == True and laser == True and measuring_started == False and machine_state != MACHINE_STATE_RUNNING:
                     print("Laser ON")
                     print("Machine state: Running\n")
                     
+                    start_time = datetime.now()
+                    #end_time = datetime.now()
+                    # duration = end_time - start_time
+                    # print("Standby time :",duration)
+                    # data = {
+                    #     "Machine ID":machine_id,
+                    #     "Start":str(start_time) ,
+                    #     "End": str(end_time),
+                    #     "Duration": str(duration),
+                    #     "isFault" : str(isFault)
+                    #     }
 
-                    end_time = datetime.now()
-                    duration = end_time - start_time
-                    print("Standby time :",duration)
-                    data = {
-                        "Machine ID":machine_id,
-                        "Start":str(start_time) ,
-                        "End": str(end_time),
-                        "Duration": str(duration),
-                        "isFault" : str(isFault)
-                        }
+                    # production_times.append(data)
 
-                    production_times.append(data)
+                    # print("\nMachine data:")
+                    # for datakey, datavalue in data.items():
+                    #     print(datakey,":",datavalue)
 
-                    print("\nMachine data:")
-                    for datakey, datavalue in data.items():
-                        print(datakey,":",datavalue)
-
-                    self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+                    # self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
 
                     standby_measuring_started = False
                     machine_state = MACHINE_STATE_RUNNING
-                    start_time = datetime.now()
+                    #start_time = datetime.now()
                     measuring_started = True
                     time.sleep(0.1)
 
@@ -337,7 +337,7 @@ class mainClass():
                     print("Laser OFF")
                     print("Machine state: Part ready")
                     measuring_started = False
-                    machine_state -= 1 #MACHINE_STATE_PART_READY
+                    machine_state = MACHINE_STATE_PART_READY
                     end_time = datetime.now()
                     duration = end_time- start_time
 
@@ -360,7 +360,8 @@ class mainClass():
                     print("\nMachine data:")
                     for datakey, datavalue in data.items():
                         print(datakey,":",datavalue)
-
+                    start_time = datetime.now()
+                    print("Datan keruu aika: ",start_time)
                     time.sleep(0.1)
                     
 
