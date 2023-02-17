@@ -30,9 +30,11 @@ print("Program running...")
 # constants
 MACHINE_STATE_POWER_OFF = 0
 MACHINE_STATE_IDLE = 1
-MACHINE_STATE_STANDBY = 2
-MACHINE_STATE_RUNNING = 3
-MACHINE_STATE_PART_READY = 4
+MACHINE_STATE_IDLE_MEASURE = 2
+MACHINE_STATE_STANDBY = 3
+MACHINE_STATE_STANDBY_MEASURE = 4
+MACHINE_STATE_RUNNING = 5
+MACHINE_STATE_PART_READY = 6
 
 
 # variables
@@ -40,6 +42,8 @@ machine_id ="Byfib8025"
 connection_succ = False
 measuring_started = False
 standby_measuring_started = False
+PrintToStandby = False
+StandbyToPrint = False
 start_time = None
 end_time = None
 duration = None
@@ -255,6 +259,8 @@ class mainClass():
         global machine_state
         global measuring_started
         global standby_measuring_started
+        global PrintToStandby
+        global StandbyToPrint
 
         #Määritetty backup tiedoston ajankohdat
         schedule.every().day.at("12:00").do(self.backupSQL).run
@@ -262,7 +268,7 @@ class mainClass():
         schedule.every().sunday.at("12:00").do(self.backupSQL).run
         schedule.every(4).hours.do(self.servuPing).run
         schedule.every(30).minutes.do(self.servuPing).run
-        schedule.every(30).minutes.do(self.backupSQL).run
+        #schedule.every(30).minutes.do(self.backupSQL).run
         #schedule.every(1).minutes.do(self.servuPing).run
 
         ## Lisättävä 2 elif osaa? Jossa sammutetaan 
@@ -288,59 +294,65 @@ class mainClass():
                 #
 
                 # machine standby and waiting for commmand
-                elif power_on == True and standby == True and laser == False and machine_state != MACHINE_STATE_STANDBY:
-                    print("Machine is standby and waiting...")
+                elif power_on == True and standby == True and laser == False and measuring_started == False and machine_state != MACHINE_STATE_STANDBY:
+                    print("\nMachine is standby and waiting...")
                     machine_state = MACHINE_STATE_STANDBY
-                    #print("Testi, katsotaan laskeeko aikaa...")
-                    #start_time = datetime.now()
-                    #print("Standby keruu aika: ",start_time)
+                    print("Testi, katsotaan laskeeko aikaa...")
+                    start_time = datetime.now()
+                    print("Standby keruu aika: ",start_time)
                     isFault = True
+
+                    measuring_started = False
                     standby_measuring_started = True
-                    measuring_started == False
 
-                # elif power_on == True and standby == True and laser == False and standby_measuring_started == False and machine_state != MACHINE_STATE_STANDBY:
-                #     print("yes")
+                elif power_on == True and standby == True and laser == True and standby_measuring_started == True and machine_state != MACHINE_STATE_STANDBY_MEASURE:
+                    
+                    machine_state = MACHINE_STATE_STANDBY_MEASURE
+                    print("\nMachine standby duration:")
+                    end_time = datetime.now()
+                    duration = end_time - start_time
+                    print("Standby time :",duration)
 
+                    data = {
+                        "Machine ID":machine_id,
+                        "Start":str(start_time) ,
+                        "End": str(end_time),
+                        "Duration": str(duration),
+                        "isFault" : str(isFault)
+                        }
+
+                    production_times.append(data)
+
+                    print("\nMachine data:")
+                    for datakey, datavalue in data.items():
+                        print(datakey,":",datavalue)
+
+                    self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+                    
+                    standby_measuring_started = False
+                    
                 # machine state laser on, production running
                 elif power_on == True and standby == True and laser == True and measuring_started == False and machine_state != MACHINE_STATE_RUNNING:
-                    print("Laser ON")
+                    print("\nLaser ON")
                     print("Machine state: Running\n")
                     
                     start_time = datetime.now()
-                    #end_time = datetime.now()
-                    # duration = end_time - start_time
-                    # print("Standby time :",duration)
-                    # data = {
-                    #     "Machine ID":machine_id,
-                    #     "Start":str(start_time) ,
-                    #     "End": str(end_time),
-                    #     "Duration": str(duration),
-                    #     "isFault" : str(isFault)
-                    #     }
 
-                    # production_times.append(data)
-
-                    # print("\nMachine data:")
-                    # for datakey, datavalue in data.items():
-                    #     print(datakey,":",datavalue)
-
-                    # self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
-
-                    standby_measuring_started = False
+                    #standby_measuring_started = False
                     machine_state = MACHINE_STATE_RUNNING
-                    #start_time = datetime.now()
                     measuring_started = True
+                    
                     time.sleep(0.1)
 
                 # machine state production end
                 elif power_on == True and standby == True and laser == False and measuring_started == True and machine_state !=MACHINE_STATE_PART_READY:
-                    print("Laser OFF")
-                    print("Machine state: Part ready")
+                    print("\nLaser OFF")
+                    print("Machine state: Part ready\n")
                     measuring_started = False
                     machine_state = MACHINE_STATE_PART_READY
                     end_time = datetime.now()
                     duration = end_time- start_time
-
+                    
                     #print("start time: ", start_time)
                     #print("duration: ", duration)
 
@@ -356,7 +368,7 @@ class mainClass():
                     production_times.append(data)
                     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
 
-                    standby_measuring_started = False
+                    #standby_measuring_started = False
                     print("\nMachine data:")
                     for datakey, datavalue in data.items():
                         print(datakey,":",datavalue)
@@ -364,36 +376,6 @@ class mainClass():
                     print("Datan keruu aika: ",start_time)
                     time.sleep(0.1)
                     
-
-
-                # # machine state ALARM
-                # elif laser == True and measuring_started == True  and standby == True and machine_state != MACHINE_STATE_STANDBY  :
-                #     print("Machine state: Alarm")
-                #     machine_state = MACHINE_STATE_STANDBY
-                #     end_time = datetime.now()
-                #     duration = end_time- start_time
-                #     print("Fault detected", end_time)
-                #     print("Cutting interrupted! timestamp: ", end_time)
-                #     print("last laser on time:", start_time)
-                #     print("Duration: ",duration)
-                #     measuring_started = False
-                #     isFault = True
-
-                #     data = {
-                #         "Machine ID":machine_id,
-                #         "Start":str(start_time),
-                #         "End": str(end_time),
-                #         "Duration": str(duration),
-                #         "isFault" : str(isFault)
-                #     }
-
-                #     production_times.append(data)
-
-                #     print("\nMachine Data:")
-                #     for datakey, datavalue in data.items():
-                #         print(datakey,":",datavalue)
-                #     time.sleep(0.1)
-                #     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
 
                 schedule.run_pending()
                 time.sleep(0.3)
