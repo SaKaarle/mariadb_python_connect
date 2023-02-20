@@ -99,16 +99,13 @@ class mainClass():
                 jsonData.seek(0)
                 json.dump(production_times,jsonData,indent=5)
 
-            # self.conn.commit()
-            # self.cursor.close()
-            # print("Cursor Closed:",self.cursor.closed)
-
 ##==================================================
 ## Connect To MariaDB using JSON -file
 ##==================================================
 ##
 ## Koodi virheellinen, keksittävä "Jos Virhe, Ota yhteys lokaaliin" jne...
 ##
+## Tämä osio on turha. Yritetty luoda lukua JSON tiedostosta ja sen epäonnistutta, ottaa yhteys localhost:iin
     def ConnectMariaDBJSON(self):
         try:
             with open('/home/pi/Desktop/sshVSC/userconf24.json','r') as loginData:
@@ -142,16 +139,17 @@ class mainClass():
 
                 except Exception as e:
                     print(f"Error occurred... '{e}' Couldn't connect to MariaDB server")#Check connection.\nPing: ",self.conn.ping
-                    #self.connParams == None
-                    #raise ConnectionError
                 finally:
-                    #self.conn.close()
                     return connection_succ == False
 
 
         except IOError as ose:
             print("Virhe, ei pystytä lukemaan tiedostoa...")
             raise FileNotFoundError(f"{ose}, can't read file: \n")
+
+##==================================================
+## Connect To MariaDB using JSON -file + localhost
+##==================================================
 
     def ConnectLocalMariaDB(self):
         try:
@@ -184,17 +182,9 @@ class mainClass():
 
                 except Exception as e:
                     print(f"Error occurred... '{e}' Couldn't connect to MariaDB server")#Check connection.\nPing: ",self.conn.ping
-                    #pass
-                    #self.conn.close()
-                    #raise ConnectionError
                     
                 finally:
-                    # print(self.conn)
-                    # self.conn.auto_reconnect = True
-                    # print(self.conn.auto_reconnect)
-                    # self.cursor = self.conn.cursor()
-                    # self.cursor.close()
-                    # print("Cursor closed...",self.cursor.closed)
+
                     return connection_succ == True
 
         except IOError as ose:
@@ -235,7 +225,7 @@ class mainClass():
 
         self.dateTimeNowString = datetime.now()
         self.dateTimePing =self.dateTimeNowString.strftime("%Y-%m-%d %H:%M:%S")
-        #pinggaus = self.conn.reconnect()
+
         print(f"\nAutomatic ping to server...\nTime: {self.dateTimePing} \n")
         try:
             self.conn.cursor()
@@ -267,7 +257,6 @@ class mainClass():
         #schedule.every(30).minutes.do(self.backupSQL).run
         #schedule.every(1).minutes.do(self.servuPing).run
 
-        ## Lisättävä 2 elif osaa? Jossa sammutetaan 
         try:
             while True:
 
