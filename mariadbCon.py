@@ -42,8 +42,6 @@ machine_id ="Byfib8025"
 connection_succ = False
 measuring_started = False
 standby_measuring_started = False
-PrintToStandby = False
-StandbyToPrint = False
 start_time = None
 end_time = None
 duration = None
@@ -259,8 +257,6 @@ class mainClass():
         global machine_state
         global measuring_started
         global standby_measuring_started
-        global PrintToStandby
-        global StandbyToPrint
 
         #Määritetty backup tiedoston ajankohdat
         schedule.every().day.at("12:00").do(self.backupSQL).run
@@ -286,20 +282,42 @@ class mainClass():
                     #Power OFF timer?
 
                 # machine state IDLE
-                elif power_on == True and standby == False and laser == False and machine_state != MACHINE_STATE_IDLE:
-                    print("Machine state: idle")
+                elif power_on == True and standby == False and laser == False and measuring_started == False and machine_state != MACHINE_STATE_IDLE:
+                    print("\nMachine state: idle")
                     machine_state = MACHINE_STATE_IDLE
-                
-                # elif machine_state == MACHINE_STATE_STANDBY:
-                #
+
+                elif power_on == True and standby == False and laser == False and standby_measuring_started == True and machine_state != MACHINE_STATE_IDLE_MEASURE:
+                    print("\nMachine state: idle")
+
+                    machine_state = MACHINE_STATE_IDLE_MEASURE
+                    print("\nMachine standby duration:")
+                    end_time = datetime.now()
+                    duration = end_time - start_time
+                    print("\nStandby time :",duration)
+
+                    data = {
+                        "Machine ID":machine_id,
+                        "Start":str(start_time) ,
+                        "End": str(end_time),
+                        "Duration": str(duration),
+                        "isFault" : str(isFault)
+                        }
+
+                    production_times.append(data)
+
+                    print("\nMachine data:")
+                    for datakey, datavalue in data.items():
+                        print(datakey,":",datavalue)
+
+                    self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+                    
+                    standby_measuring_started = False
 
                 # machine standby and waiting for commmand
                 elif power_on == True and standby == True and laser == False and measuring_started == False and machine_state != MACHINE_STATE_STANDBY:
                     print("\nMachine is standby and waiting...")
                     machine_state = MACHINE_STATE_STANDBY
-                    print("Testi, katsotaan laskeeko aikaa...")
                     start_time = datetime.now()
-                    print("Standby keruu aika: ",start_time)
                     isFault = True
 
                     measuring_started = False
@@ -311,7 +329,7 @@ class mainClass():
                     print("\nMachine standby duration:")
                     end_time = datetime.now()
                     duration = end_time - start_time
-                    print("Standby time :",duration)
+                    print("\nStandby time :",duration)
 
                     data = {
                         "Machine ID":machine_id,
@@ -338,7 +356,6 @@ class mainClass():
                     
                     start_time = datetime.now()
 
-                    #standby_measuring_started = False
                     machine_state = MACHINE_STATE_RUNNING
                     measuring_started = True
                     
