@@ -144,6 +144,43 @@ WantedBy=multi-user.target
 Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
 Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja `WorkingDirectory=/home/pi/jokinsijainti` saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää `chmod 755` tai muista oikeuksien lisäämisestä.
  
+Toinen yksinkertainen versio joka toimii asennettuani [NetworkManagerin](https://wiki.archlinux.org/title/NetworkManager). Tämä on stabiilimpi ja varmempi nettikonfiguroinneissa. Tarkemmat asennusohjeet löytyvät [Stack Exchange](https://raspberrypi.stackexchange.com/a/116808) sivustolta, mutta yksinkertaisesti:
+ 
+```
+sudo apt install network-manager network-manager-gnome
+
+sudo systemctl enable NetworkManager
+sudo systemctl start NetworkManager
+sudo systemctl disable dhcpcd
+
+sudo reboot -h now
+```
+
+On tärkeää tarkistaa DHCP -palvelun tila ettei se ole häiritsemässä taustalla.
+
+```
+pi@rpi3B:~ $ sudo systemctl status dhcpcd
+● dhcpcd.service - DHCP Client Daemon
+     Loaded: loaded (/lib/systemd/system/dhcpcd.service; enabled; vendor preset: enabled)
+     Active: inactive (dead)
+       Docs: man:dhcpcd(8)
+
+```
+
+```
+[Unit]
+#Human readable name of the unit
+Description=Python Script LaserMachine
+After=multi-user.target
+[Service]
+User=pi
+Type=idle
+ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
+[Install]
+WantedBy=multi-user.target
+
+```
+
 Viimeisimmässä muokkauksessani löysin mahdollisen syyn, miksei `rasplaser.service` lähtenyt käyntiin. `After=network.target` viivästyttää vielä Python skriptin aktivoinnin, että MariaDB / MySQL Service pystyvät aktivoitumaan. `sudo systemctl status rasplaser` antoi virheeksi, ettei kykenyt lukemaan MariaDB .json tiedosta, jossa on kirjautumistiedot.
  
 
