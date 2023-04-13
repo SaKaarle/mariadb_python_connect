@@ -8,3 +8,4 @@ __pycache__
 .vscode/launch.json
 jsonBackupMachine1.json
 testiSecur.py
+#mariadbCon_backup.py
