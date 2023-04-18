@@ -41,9 +41,10 @@ MACHINE_STATE_PART_READY = 7
 # variables
 machine_id ="Byfib8025"
 connection_succ = False
-off_measuring_started = False
-measuring_started = False
-standby_measuring_started = False
+off_mode = False
+idle_mode = False
+standby_mode = False
+laser_mode = False
 start_time = None
 end_time = None
 duration = None
@@ -248,8 +249,10 @@ class mainClass():
 
         global machine_state
         global off_measuring_started
-        global measuring_started
-        global standby_measuring_started
+        global laser_mode
+        global standby_mode
+        global idle_mode
+        global off_mode
 
         #Määritetty backup tiedoston ajankohdat
         schedule.every().day.at("12:00").do(self.backupSQL).run
@@ -260,6 +263,15 @@ class mainClass():
         #schedule.every(30).minutes.do(self.backupSQL).run
         #schedule.every(1).minutes.do(self.servuPing).run
 
+
+        # MACHINE_STATE_POWER_OFF = 0
+        # MACHINE_STATE_POWER_OFF_MEASURE = 1
+        # MACHINE_STATE_IDLE = 2
+        # MACHINE_STATE_IDLE_MEASURE = 3
+        # MACHINE_STATE_STANDBY = 4
+        # MACHINE_STATE_STANDBY_MEASURE = 5
+        # MACHINE_STATE_RUNNING = 6
+        # MACHINE_STATE_PART_READY = 7
         try:
             while True:
 
@@ -267,24 +279,23 @@ class mainClass():
                 standby = GPIO.input(MACHINE_STANDBY)
                 power_on = GPIO.input(MACHINE_POWER_ON_SIGNAL)
 
-                # machine state OFF
-                if power_on == False and standby == False and laser == False and off_measuring_started == False and machine_state != MACHINE_STATE_POWER_OFF:
+
+                # machine state: Power OFF
+                if power_on == False and standby == False and laser == False and off_mode == False and machine_state != MACHINE_STATE_POWER_OFF:
                     machine_state = MACHINE_STATE_POWER_OFF
-                    print("Machine state: Power OFF")
-
-                elif power_on == False and standby == False and laser == False and off_measuring_started == False and machine_state != MACHINE_STATE_POWER_OFF_MEASURE:
-                    machine_state = MACHINE_STATE_POWER_OFF_MEASURE
                     isFault = 0
-                    print("Machine state: Power OFF\nIsFault="+str(isFault))
+                    print("\nMachine state: Power OFF\nIsFault="+str(isFault))
                     #Power OFF timer?
-                    off_measuring_started = True
+                    off_mode = True
                     start_time = datetime.now()
-                    print(start_time)
+                    print(str(start_time))
 
-                    
-                elif power_on == True and standby == False and laser == False and off_measuring_started == True and machine_state != MACHINE_STATE_POWER_OFF_MEASURE:
+                # Machine state: Power ON and ending OFF measure
+                elif power_on == True and standby == False and laser == False and off_mode == True and machine_state != MACHINE_STATE_POWER_OFF_MEASURE:
                     machine_state = MACHINE_STATE_POWER_OFF_MEASURE
-                    off_measuring_started = False
+                    off_mode = False
+                    idle_mode = True
+
                     print("\nMachine OFF duration:")
                     end_time = datetime.now()
                     duration = end_time - start_time
@@ -305,23 +316,26 @@ class mainClass():
                         print(datakey,":",datavalue)
 
                     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
-                    
-                    standby_measuring_started = False
 
-
-                # machine state IDLE
-                elif power_on == True and standby == False and laser == False and measuring_started == False and machine_state != MACHINE_STATE_IDLE:
-                    print("\nMachine state: idle")
+                # Machine state: Power On
+                elif power_on == True and standby == False and laser == False and idle_mode == True and machine_state != MACHINE_STATE_IDLE:
                     machine_state = MACHINE_STATE_IDLE
-
-                elif power_on == True and standby == False and laser == False and standby_measuring_started == True and machine_state != MACHINE_STATE_IDLE_MEASURE:
-                    print("\nMachine state: idle")
                     isFault = 1
-                    machine_state = MACHINE_STATE_IDLE_MEASURE
-                    print("\nMachine standby duration:")
+                    print("\nMachine state: Power On\nIsFault="+str(isFault))
+                    #Power OFF timer?
+                    off_mode = True
+                    start_time = datetime.now()
+                    print(str(start_time))
+
+
+                elif power_on == True and standby == False and laser == False and off_mode == True and machine_state != MACHINE_STATE_POWER_OFF_MEASURE:
+                    machine_state = MACHINE_STATE_POWER_OFF_MEASURE
+                    off_mode = False
+
+                    print("\nMachine OFF duration:")
                     end_time = datetime.now()
                     duration = end_time - start_time
-                    print("\nStandby time :",duration)
+                    print("\nOFF time :",duration)
 
                     data = {
                         "Machine ID":machine_id,
@@ -338,89 +352,304 @@ class mainClass():
                         print(datakey,":",datavalue)
 
                     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+
+
+                """ Koodaus yritys saada toimimaan toisella logiikalla...
+### 
+                # # machine state OFF
+                # if power_on == False and standby == False and laser == False and off_mode == False and machine_state != MACHINE_STATE_POWER_OFF:
+                #     machine_state = MACHINE_STATE_POWER_OFF
+                #     isFault = 0
+                #     print("\nMachine state: Power OFF\nIsFault="+str(isFault))
+                #     #Power OFF timer?
+                #     off_mode = True
+                #     start_time = datetime.now()
+                #     print(start_time)
+                # elif power_on == True and standby == False and laser == False and off_mode == True and machine_state != MACHINE_STATE_POWER_OFF_MEASURE:
+                #     machine_state = MACHINE_STATE_POWER_OFF_MEASURE
+                #     off_mode = False
+
+                #     print("\nMachine OFF duration:")
+                #     end_time = datetime.now()
+                #     duration = end_time - start_time
+                #     print("\nOFF time :",duration)
+
+                #     data = {
+                #         "Machine ID":machine_id,
+                #         "Start":str(start_time) ,
+                #         "End": str(end_time),
+                #         "Duration": str(duration),
+                #         "isFault" : str(isFault)
+                #         }
+
+                #     production_times.append(data)
+
+                #     print("\nMachine data:")
+                #     for datakey, datavalue in data.items():
+                #         print(datakey,":",datavalue)
+
+                #     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+                
+                # elif power_on == True and standby == False and laser == False and idle_mode == False and machine_state != MACHINE_STATE_IDLE:
+                #     machine_state = MACHINE_STATE_IDLE
+                #     isFault = 1
+                #     print("\nMachine state: IDLE\nIsFault="+str(isFault))
+                #     #Power OFF timer?
+                #     idle_mode = True
+                #     start_time = datetime.now()
+                #     print(start_time)
+
+                # elif power_on == True and standby == True and laser == False and idle_mode == True and machine_state != MACHINE_STATE_IDLE_MEASURE:
+                #     machine_state = MACHINE_STATE_IDLE_MEASURE
+                #     idle_mode = False
                     
-                    standby_measuring_started = False
 
-                # machine standby and waiting for commmand
-                elif power_on == True and standby == True and laser == False and measuring_started == False and machine_state != MACHINE_STATE_STANDBY:
-                    print("\nMachine is standby and waiting...")
-                    machine_state = MACHINE_STATE_STANDBY
-                    start_time = datetime.now()
-                    isFault = 2
+                #     print("\nMachine IDLE duration:")
+                #     end_time = datetime.now()
+                #     duration = end_time - start_time
+                #     print("\nIDLE time :",duration)
 
-                    measuring_started = False
-                    standby_measuring_started = True
+                #     data = {
+                #         "Machine ID":machine_id,
+                #         "Start":str(start_time) ,
+                #         "End": str(end_time),
+                #         "Duration": str(duration),
+                #         "isFault" : str(isFault)
+                #         }
 
-                elif power_on == True and standby == True and laser == True and standby_measuring_started == True and machine_state != MACHINE_STATE_STANDBY_MEASURE:
+                #     production_times.append(data)
+
+                #     print("\nMachine data:")
+                #     for datakey, datavalue in data.items():
+                #         print(datakey,":",datavalue)
+
+                #     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+
+                # elif power_on == True and standby == True and laser == False and standby_mode == False and machine_state != MACHINE_STATE_STANDBY:
+                #     machine_state = MACHINE_STATE_STANDBY
+                #     isFault = 2
+                #     print("\nMachine state: STANDBY\nIsFault="+str(isFault))
+                #     #Power OFF timer?
+                #     standby_mode = True
+                #     start_time = datetime.now()
+                #     print(start_time)
+
+
+                # elif power_on == True and standby == True and laser == True and standby_mode == True and machine_state != MACHINE_STATE_STANDBY_MEASURE:
+                #     machine_state = MACHINE_STATE_STANDBY_MEASURE
+                #     standby_mode = False
+
+                #     print("\nMachine STANDBY duration:")
+                #     end_time = datetime.now()
+                #     duration = end_time - start_time
+                #     print("\nSTANDBY time :",duration)
+
+                #     data = {
+                #         "Machine ID":machine_id,
+                #         "Start":str(start_time) ,
+                #         "End": str(end_time),
+                #         "Duration": str(duration),
+                #         "isFault" : str(isFault)
+                #         }
+
+                #     production_times.append(data)
+
+                #     print("\nMachine data:")
+                #     for datakey, datavalue in data.items():
+                #         print(datakey,":",datavalue)
+
+                #     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+
+                # elif power_on == True and standby == True and laser == True and laser_mode == False and machine_state != MACHINE_STATE_RUNNING:
+                #     machine_state = MACHINE_STATE_RUNNING
+                #     isFault = 3
+                #     print("\nMachine state: LASER\nIsFault="+str(isFault))
+                #     #Power OFF timer?
+                #     laser_mode = True
+                #     start_time = datetime.now()
+                #     print(start_time)
+
+                # elif power_on == True and standby == True and laser == False and laser_mode == True and machine_state != MACHINE_STATE_PART_READY: 
+                #     machine_state = MACHINE_STATE_PART_READY
+                #     #standby_mode = True
+                #     laser_mode = False
+
+                #     print("\nMachine LASER duration:")
+                #     end_time = datetime.now()
+                #     duration = end_time - start_time
+                #     print("\nLaser time :",duration)
+
+                #     data = {
+                #         "Machine ID":machine_id,
+                #         "Start":str(start_time) ,
+                #         "End": str(end_time),
+                #         "Duration": str(duration),
+                #         "isFault" : str(isFault)
+                #         }
+
+                #     production_times.append(data)
+
+                #     print("\nMachine data:")
+                #     for datakey, datavalue in data.items():
+                #         print(datakey,":",datavalue)
+
+                #     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+                """
+
+                """################↓↓↓ VANHA LOGIIKKA ↓↓↓############
+                
+                # elif power_on == False and standby == False and laser == False and standby_mode == True and machine_state != MACHINE_STATE_POWER_OFF_MEASURE:
+                #     machine_state = MACHINE_STATE_POWER_OFF_MEASURE
+                #     isFault = 0
+                #     print("Machine state: Power OFF\nIsFault="+str(isFault))
+                #     #Power OFF timer?
+                #     standby_mode = False
+                #     start_time = datetime.now()
+                #     print(start_time)
+
                     
-                    machine_state = MACHINE_STATE_STANDBY_MEASURE
-                    print("\nMachine standby duration:")
-                    end_time = datetime.now()
-                    duration = end_time - start_time
-                    print("\nStandby time :",duration)
+                # elif power_on == True and standby == False and laser == False and standby_mode == False and machine_state != MACHINE_STATE_POWER_OFF_MEASURE:
+                #     machine_state = MACHINE_STATE_POWER_OFF_MEASURE
+                #     standby_mode = True
+                #     off_mode = False
 
-                    data = {
-                        "Machine ID":machine_id,
-                        "Start":str(start_time) ,
-                        "End": str(end_time),
-                        "Duration": str(duration),
-                        "isFault" : str(isFault)
-                        }
+                #     print("\nMachine OFF duration:")
+                #     end_time = datetime.now()
+                #     duration = end_time - start_time
+                #     print("\nOFF time :",duration)
 
-                    production_times.append(data)
+                #     data = {
+                #         "Machine ID":machine_id,
+                #         "Start":str(start_time) ,
+                #         "End": str(end_time),
+                #         "Duration": str(duration),
+                #         "isFault" : str(isFault)
+                #         }
 
-                    print("\nMachine data:")
-                    for datakey, datavalue in data.items():
-                        print(datakey,":",datavalue)
+                #     production_times.append(data)
 
-                    self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+                #     print("\nMachine data:")
+                #     for datakey, datavalue in data.items():
+                #         print(datakey,":",datavalue)
+
+                #     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
                     
-                    standby_measuring_started = False
-                    
-                # machine state laser on, production running
-                elif power_on == True and standby == True and laser == True and measuring_started == False and machine_state != MACHINE_STATE_RUNNING:
-                    print("\nLaser ON")
-                    print("Machine state: Running\n")
-                    
-                    start_time = datetime.now()
+                #     standby_measuring_started = False
 
-                    machine_state = MACHINE_STATE_RUNNING
-                    measuring_started = True
+
+                # # machine state IDLE
+                # elif power_on == True and standby == False and laser == False and measuring_started == False and machine_state != MACHINE_STATE_IDLE:
+                #     print("\nMachine state: idle")
+                #     machine_state = MACHINE_STATE_IDLE
+
+                # elif power_on == True and standby == False and laser == False and standby_measuring_started == True and machine_state != MACHINE_STATE_IDLE_MEASURE:
+                #     print("\nMachine state: idle")
+                #     isFault = 1
+                #     machine_state = MACHINE_STATE_IDLE_MEASURE
+                #     print("\nMachine standby duration:")
+                #     end_time = datetime.now()
+                #     duration = end_time - start_time
+                #     print("\nStandby time :",duration)
+
+                #     data = {
+                #         "Machine ID":machine_id,
+                #         "Start":str(start_time) ,
+                #         "End": str(end_time),
+                #         "Duration": str(duration),
+                #         "isFault" : str(isFault)
+                #         }
+
+                #     production_times.append(data)
+
+                #     print("\nMachine data:")
+                #     for datakey, datavalue in data.items():
+                #         print(datakey,":",datavalue)
+
+                #     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
                     
-                    time.sleep(0.1)
+                #     standby_measuring_started = False
 
-                # machine state production end
-                elif power_on == True and standby == True and laser == False and measuring_started == True and machine_state !=MACHINE_STATE_PART_READY:
-                    print("\nLaser OFF")
-                    print("Machine state: Part ready\n")
-                    measuring_started = False
-                    machine_state = MACHINE_STATE_PART_READY
-                    end_time = datetime.now()
-                    duration = end_time- start_time
+                # # machine standby and waiting for commmand
+                # elif power_on == True and standby == True and laser == False and measuring_started == False and machine_state != MACHINE_STATE_STANDBY:
+                #     print("\nMachine is standby and waiting...")
+                #     machine_state = MACHINE_STATE_STANDBY
+                #     start_time = datetime.now()
+                #     isFault = 2
+
+                #     measuring_started = False
+                #     standby_measuring_started = True
+
+                # elif power_on == True and standby == True and laser == True and standby_measuring_started == True and machine_state != MACHINE_STATE_STANDBY_MEASURE:
                     
-                    #print("start time: ", start_time)
-                    #print("duration: ", duration)
+                #     machine_state = MACHINE_STATE_STANDBY_MEASURE
+                #     print("\nMachine standby duration:")
+                #     end_time = datetime.now()
+                #     duration = end_time - start_time
+                #     print("\nStandby time :",duration)
 
-                    isFault = 3
-                    data = {
-                        "Machine ID":machine_id,
-                        "Start":str(start_time) ,
-                        "End": str(end_time),
-                        "Duration": str(duration),
-                        "isFault" : str(isFault)
-                        }
+                #     data = {
+                #         "Machine ID":machine_id,
+                #         "Start":str(start_time) ,
+                #         "End": str(end_time),
+                #         "Duration": str(duration),
+                #         "isFault" : str(isFault)
+                #         }
 
-                    production_times.append(data)
-                    self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+                #     production_times.append(data)
 
-                    #standby_measuring_started = False
-                    print("\nMachine data:")
-                    for datakey, datavalue in data.items():
-                        print(datakey,":",datavalue)
-                    start_time = datetime.now()
-                    print("Datan keruu aika: ",start_time)
-                    time.sleep(0.1)
+                #     print("\nMachine data:")
+                #     for datakey, datavalue in data.items():
+                #         print(datakey,":",datavalue)
+
+                #     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
                     
+                #     standby_measuring_started = False
+                    
+                # # machine state laser on, production running
+                # elif power_on == True and standby == True and laser == True and measuring_started == False and machine_state != MACHINE_STATE_RUNNING:
+                #     print("\nLaser ON")
+                #     print("Machine state: Running\n")
+                    
+                #     start_time = datetime.now()
+
+                #     machine_state = MACHINE_STATE_RUNNING
+                #     measuring_started = True
+                    
+                #     time.sleep(0.1)
+
+                # # machine state production end
+                # elif power_on == True and standby == True and laser == False and measuring_started == True and machine_state !=MACHINE_STATE_PART_READY:
+                #     print("\nLaser OFF")
+                #     print("Machine state: Part ready\n")
+                #     measuring_started = False
+                #     machine_state = MACHINE_STATE_PART_READY
+                #     end_time = datetime.now()
+                #     duration = end_time- start_time
+                    
+                #     #print("start time: ", start_time)
+                #     #print("duration: ", duration)
+
+                #     isFault = 3
+                #     data = {
+                #         "Machine ID":machine_id,
+                #         "Start":str(start_time) ,
+                #         "End": str(end_time),
+                #         "Duration": str(duration),
+                #         "isFault" : str(isFault)
+                #         }
+
+                #     production_times.append(data)
+                #     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+
+                #     #standby_measuring_started = False
+                #     print("\nMachine data:")
+                #     for datakey, datavalue in data.items():
+                #         print(datakey,":",datavalue)
+                #     start_time = datetime.now()
+                #     print("Datan keruu aika: ",start_time)
+                #     time.sleep(0.1)
+                """    
+
 
                 schedule.run_pending()
                 time.sleep(0.3)
