@@ -145,7 +145,14 @@ Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoise
 Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja `WorkingDirectory=/home/pi/jokinsijainti` saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää `chmod 755` tai muista oikeuksien lisäämisestä.
  
 Toinen yksinkertainen versio joka toimii asennettuani [NetworkManagerin](https://wiki.archlinux.org/title/NetworkManager). Tämä on stabiilimpi ja varmempi nettikonfiguroinneissa. Tarkemmat asennusohjeet löytyvät [Stack Exchange](https://raspberrypi.stackexchange.com/a/116808) sivustolta, mutta yksinkertaisesti:
+
  
+ 
+# Crontab
+
+Crontab on yksinkertainen vaihtoehto laittamaan palveluita käyntiin. Ohjeita löytyy erillaisille toiminnoille ja mitä halutaan saavuttaa vaikka Raspberry Pi / SBC käynnistyksessä.
+
+[Asennusohjeita(https://www.dexterindustries.com/howto/auto-run-python-programs-on-the-raspberry-pi/)] seuraamalla asennetaan Crontab terminaalista `sudo apt install cron` 
 ```
 sudo apt install network-manager network-manager-gnome
 
