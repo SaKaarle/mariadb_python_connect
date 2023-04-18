@@ -152,7 +152,7 @@ Toinen yksinkertainen versio joka toimii asennettuani [NetworkManagerin](https:/
 
 Crontab on yksinkertainen vaihtoehto laittamaan palveluita käyntiin. Ohjeita löytyy erillaisille toiminnoille ja mitä halutaan saavuttaa vaikka Raspberry Pi / SBC käynnistyksessä.
 
-[Asennusohjeita(https://www.dexterindustries.com/howto/auto-run-python-programs-on-the-raspberry-pi/)] seuraamalla asennetaan Crontab terminaalista `sudo apt install cron` 
+[Asennusohjeita](https://www.dexterindustries.com/howto/auto-run-python-programs-on-the-raspberry-pi/) seuraamalla asennetaan Crontab terminaalista `sudo apt install cron` 
 ```
 sudo apt install network-manager network-manager-gnome
 
