@@ -284,49 +284,60 @@ class mainClass():
                 if power_on == False and standby == False and laser == False and machine_state != MACHINE_STATE_POWER_OFF:
                     machine_state = MACHINE_STATE_POWER_OFF
                     print("Power OFF:\n")
-                    if off_mode == False:
+                    if off_mode == False and idle_mode == False:
                         print("Power OFF | Measuring started:"+str(datetime.now()))
                         off_mode = True
-                        standby_mode = False
                         idle_mode = False
-                        laser_mode = False
+
+                    elif idle_mode == True and off_mode == False:
+                        print("\n...From Idle to Off...\n"+str(datetime.now()))
+                        idle_mode = False
+                        off_mode = True
+
+
                     
                     
                 elif power_on == True and standby == False and laser == False and machine_state != MACHINE_STATE_IDLE:
                     machine_state = MACHINE_STATE_IDLE
 
                     print("Power ON")
-                    if idle_mode == False:
+                    if idle_mode == False and off_mode == True:
                         print("Idle | Measuring started:"+str(datetime.now()))
-                        off_mode = False
-                        standby_mode = False
                         idle_mode = True
-                        laser_mode = False
-                    elif standby_mode == True:
+                        standby_mode = False
+                        off_mode = False
+
+                    elif standby_mode == True and idle_mode == False:
                         print("\n...From Standby to Idle...\n"+str(datetime.now()))
                         standby_mode = False
+                        idle_mode = True
 
-                        
-                    
+
                 elif power_on == True and standby == True and laser == False and machine_state != MACHINE_STATE_STANDBY:
                     machine_state = MACHINE_STATE_STANDBY
                     print("Standby")
-                    if standby_mode == False:
+                    if standby_mode == False and idle_mode == True:
                         print(" Standby Mode | Measuring started:"+str(datetime.now()))
-                        off_mode = False
-                        standby_mode = True
                         idle_mode = False
+                        standby_mode = True
                         laser_mode = False
+                        
+                    elif laser_mode == True and standby_mode == False:
+                        print("\n...From Laser to Standby...\n"+str(datetime.now()))
+                        laser_mode = False
+                        standby_mode = True
 
                 elif power_on == True and standby == True and laser == True and machine_state != MACHINE_STATE_RUNNING:
                     machine_state = MACHINE_STATE_RUNNING
                     print("Laser ON")
                     if laser_mode == False:
                         print("Laser ON | Measuring started:"+str(datetime.now()))
-                        off_mode = False
-                        standby_mode = False
-                        idle_mode = False
                         laser_mode = True
+                        standby_mode = False
+                        
+                    #elif laser_mode == True:
+                        #print("\n...From Standby to Idle...\n"+str(datetime.now()))
+                        #laser_mode = False
                         
 
                 """ Koodaus yritys saada toimimaan toisella logiikalla...
