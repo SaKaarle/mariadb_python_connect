@@ -293,9 +293,6 @@ class mainClass():
                         print("\n...From Idle to Off...\n"+str(datetime.now()))
                         idle_mode = False
                         off_mode = True
-
-
-                    
                     
                 elif power_on == True and standby == False and laser == False and machine_state != MACHINE_STATE_IDLE:
                     machine_state = MACHINE_STATE_IDLE
