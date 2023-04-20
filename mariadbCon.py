@@ -254,7 +254,7 @@ class mainClass():
         #print("start timer:")
 
         global isFaultMode
-
+        self.start_time = datetime.now()
         if isFault == 0:
             isFaultMode = "OFF"
         elif isFault == 1:
@@ -263,9 +263,10 @@ class mainClass():
             isFaultMode = "STANDBY"
         elif isFault == 3:
             isFaultMode = "LASER"
-
-        print(f"Starting measuring {isFaultMode} mode. Starting time: "+str(start_time.strftime("%H:%M:%S")))
+        
+        print(f"Starting measuring {isFaultMode} mode.\nStarting time: "+str(self.start_time.strftime("%H:%M:%S")))
         time.sleep(0.3)
+        #return start_time
 
 #================================================================
 # STOP logiikka
@@ -275,7 +276,7 @@ class mainClass():
         #print("Stop timer:")
 
         end_time = datetime.now()
-        duration = end_time - start_time
+        duration = end_time - self.start_time
         print("\nDuration:",duration)
         data = {
             "Machine ID":machine_id,
@@ -289,7 +290,9 @@ class mainClass():
         for datakey, datavalue in data.items():
             print(datakey,":",datavalue)
         self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+        self.start_time = datetime.now()
         time.sleep(0.3)
+        
 
 #================================================================
 # Laser logiikka
@@ -343,7 +346,7 @@ class mainClass():
                     if measuring_started == False:
                         
                         isFault = 0
-                        start_time = datetime.now()
+                        #self.start_time = datetime.now()
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
 
                         measuring_started = True
@@ -353,7 +356,7 @@ class mainClass():
                     elif measuring_started == True:
                         #print("\n...From Idle to Off...\n"+str(datetime.now()))
                         self.stopMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
-                        start_time = datetime.now()
+                        #start_time = datetime.now()
                         isFault = 0
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
 
@@ -365,7 +368,7 @@ class mainClass():
                     # Idle | Measuring started
                     if measuring_started == False:
 
-                        start_time = datetime.now()
+                        #start_time = datetime.now()
                         isFault = 1
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         measuring_started = True
@@ -374,7 +377,7 @@ class mainClass():
                     elif measuring_started == True:
                         
                         self.stopMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
-                        start_time = datetime.now()
+                        #start_time = datetime.now()
                         isFault = 1
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
 
@@ -386,7 +389,7 @@ class mainClass():
                     # Standby Mode | Measuring started
                     if measuring_started == False:
 
-                        start_time = datetime.now()
+                        #start_time = datetime.now()
                         isFault = 2
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         measuring_started = True
@@ -395,7 +398,7 @@ class mainClass():
                     elif measuring_started == True:
 
                         self.stopMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
-                        start_time = datetime.now()
+                        #start_time = datetime.now()
                         isFault = 2
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
 
@@ -407,7 +410,7 @@ class mainClass():
 
                     # Laser ON and measuring started
                     if measuring_started == False:
-                        start_time = datetime.now()
+                        #start_time = datetime.now()
                         isFault = 3
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         measuring_started = True
@@ -416,7 +419,7 @@ class mainClass():
                     elif measuring_started == True:
                         
                         self.stopMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
-                        start_time = datetime.now()
+                        #start_time = datetime.now()
                         isFault = 3
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         
