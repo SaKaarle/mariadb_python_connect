@@ -373,7 +373,11 @@ class mainClass():
                 # machine state: Power OFF and Start Measure
                 if power_on == False and standby == False and laser == False and machine_state != MACHINE_STATE_POWER_OFF:
                     machine_state = MACHINE_STATE_POWER_OFF
-                    
+                    print("Current modes:\n"+"off_mode:",str(off_mode)+"\n"
+                        +"idle_mode:",str(idle_mode)+"\n"
+                        +"standby_mode:",str(standby_mode)+"\n"
+                        +"laser_mode:",str(laser_mode)+"\n")
+
                     print("Power OFF:\n")
                     # Start OFF measure
                     if off_mode == False and idle_mode == False:
@@ -398,8 +402,12 @@ class mainClass():
                     
                 elif power_on == True and standby == False and laser == False and machine_state != MACHINE_STATE_IDLE:
                     machine_state = MACHINE_STATE_IDLE
+                    print("Current modes:\n"+"off_mode:",str(off_mode)+"\n"
+                        +"idle_mode:",str(idle_mode)+"\n"
+                        +"standby_mode:",str(standby_mode)+"\n"
+                        +"laser_mode:",str(laser_mode)+"\n")
 
-                    print("Power ON")
+                    print("Power ON:\n")
                     # Idle | Measuring started
                     if idle_mode == True:
 
@@ -441,7 +449,11 @@ class mainClass():
 
                 elif power_on == True and standby == True and laser == False and machine_state != MACHINE_STATE_STANDBY:
                     machine_state = MACHINE_STATE_STANDBY
-                    print("Standby")
+                    print("Current modes:\n"+"off_mode:",str(off_mode)+"\n"
+                        +"idle_mode:",str(idle_mode)+"\n"
+                        +"standby_mode:",str(standby_mode)+"\n"
+                        +"laser_mode:",str(laser_mode)+"\n")
+                    print("Standby:\n")
 
                     # Standby Mode | Measuring started
                     if standby_mode == True:
@@ -477,7 +489,11 @@ class mainClass():
                 # Laserleikkauksen mittaus
                 elif power_on == True and standby == True and laser == True and machine_state != MACHINE_STATE_RUNNING:
                     machine_state = MACHINE_STATE_RUNNING
-                    print("Laser ON")
+                    print("Current modes:\n"+"off_mode:",str(off_mode)+"\n"
+                        +"idle_mode:",str(idle_mode)+"\n"
+                        +"standby_mode:",str(standby_mode)+"\n"
+                        +"laser_mode:",str(laser_mode)+"\n")
+                    print("Laser ON:\n")
 
                     # Laser ON and measuring started
                     if laser_mode == True:
