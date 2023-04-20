@@ -265,6 +265,7 @@ class mainClass():
             isFaultMode = "LASER"
 
         print(f"Starting measuring {isFaultMode} mode. Starting time: "+str(start_time.strftime("%H:%M:%S")))
+        time.sleep(0.3)
 
 #================================================================
 # STOP logiikka
@@ -288,6 +289,7 @@ class mainClass():
         for datakey, datavalue in data.items():
             print(datakey,":",datavalue)
         self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+        time.sleep(0.3)
 
 #================================================================
 # Laser logiikka
@@ -409,7 +411,7 @@ class mainClass():
                         isFault = 3
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         measuring_started = True
-                        
+
                     # Stop Standby Measure and Start Laser Measure 
                     elif measuring_started == True:
                         
