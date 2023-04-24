@@ -46,10 +46,6 @@ MACHINE_STATE_PART_READY = 7
 machine_id ="Byfib8025"
 connection_succ = False
 measuring_started = False
-off_mode = False
-idle_mode = False
-standby_mode = False
-laser_mode = False
 start_time = None
 end_time = None
 duration = None
@@ -82,11 +78,11 @@ class mainClass():
     def dataSendDb(self,machine_id, start_time, end_time, duration,isFault):
         query = "INSERT INTO laserdata (machine_id, start_time, end_time, duration, isFault) " \
             "VALUES (%s,%s,%s,%s,%s)"
-        args = (machine_id, start_time, end_time, duration, isFault)
+        args = (machine_id, self.start_time, self.end_time, self.duration, self.isFault)
         try:
             
-            print(self.conn.reconnect())
-            print(self.conn.ping())
+            #print(self.conn.reconnect())
+            #print(self.conn.ping())
 
             self.cursor = self.conn.cursor()
             self.cursor.execute(query,args)
@@ -102,7 +98,7 @@ class mainClass():
             
             self.conn.commit()
             self.cursor.close()
-            print("Cursor Closed:",self.cursor.closed)
+            print("Cursor Closed:",self.cursor.closed,"\n")
             with open(jsonBackupFile,'w') as jsonData:
                 #production_times.append(data)
                 jsonData.seek(0)
@@ -254,19 +250,20 @@ class mainClass():
         #print("start timer:")
 
         global isFaultMode
+
         self.start_time = datetime.now()
-        if isFault == 0:
+        if self.isFault == 0:
             isFaultMode = "OFF"
-        elif isFault == 1:
+        elif self.isFault == 1:
             isFaultMode ="IDLE"
-        elif isFault == 2:
+        elif self.isFault == 2:
             isFaultMode = "STANDBY"
-        elif isFault == 3:
+        elif self.isFault == 3:
             isFaultMode = "LASER"
         
         print(f"Starting measuring {isFaultMode} mode.\nStarting time: "+str(self.start_time.strftime("%H:%M:%S")))
         time.sleep(0.3)
-        #return start_time
+        
 
 #================================================================
 # STOP logiikka
@@ -275,22 +272,22 @@ class mainClass():
 
         #print("Stop timer:")
 
-        end_time = datetime.now()
-        duration = end_time - self.start_time
-        print("\nDuration:",duration)
+        self.end_time = datetime.now()
+        self.duration = self.end_time - self.start_time
+        print("\nDuration:",self.duration)
         data = {
             "Machine ID":machine_id,
-            "Start":str(start_time) ,
-            "End": str(end_time),
-            "Duration": str(duration),
-            "isFault" : str(isFault)
+            "Start":str(self.start_time) ,
+            "End": str(self.end_time),
+            "Duration": str(self.duration),
+            "isFault" : str(self.isFault)
             }
         production_times.append(data)
         print("\nMachine data:")
         for datakey, datavalue in data.items():
             print(datakey,":",datavalue)
         self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
-        self.start_time = datetime.now()
+        #self.start_time = datetime.now()
         time.sleep(0.3)
         
 
@@ -302,10 +299,6 @@ class mainClass():
 
         global machine_state
         global measuring_started
-        global laser_mode
-        global standby_mode
-        global idle_mode
-        global off_mode
         global laser
         global standby
         global power_on
@@ -341,11 +334,11 @@ class mainClass():
                 if power_on == False and standby == False and laser == False and machine_state != MACHINE_STATE_POWER_OFF:
                     machine_state = MACHINE_STATE_POWER_OFF
 
-                    print("Power OFF:\n")
+                    print("Power OFF:")
                     # Start OFF measure
                     if measuring_started == False:
                         
-                        isFault = 0
+                        self.isFault = 0
                         #self.start_time = datetime.now()
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
 
@@ -357,19 +350,19 @@ class mainClass():
                         #print("\n...From Idle to Off...\n"+str(datetime.now()))
                         self.stopMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         #start_time = datetime.now()
-                        isFault = 0
+                        self.isFault = 0
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
 
                     
                 elif power_on == True and standby == False and laser == False and machine_state != MACHINE_STATE_IDLE:
                     machine_state = MACHINE_STATE_IDLE
 
-                    print("Power ON:\n")
+                    print("Power ON:")
                     # Idle | Measuring started
                     if measuring_started == False:
 
                         #start_time = datetime.now()
-                        isFault = 1
+                        self.isFault = 1
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         measuring_started = True
                     
@@ -378,19 +371,19 @@ class mainClass():
                         
                         self.stopMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         #start_time = datetime.now()
-                        isFault = 1
+                        self.isFault = 1
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
 
                 elif power_on == True and standby == True and laser == False and machine_state != MACHINE_STATE_STANDBY:
                     machine_state = MACHINE_STATE_STANDBY
 
-                    print("Standby:\n")
+                    print("Standby:")
 
                     # Standby Mode | Measuring started
                     if measuring_started == False:
 
                         #start_time = datetime.now()
-                        isFault = 2
+                        self.isFault = 2
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         measuring_started = True
 
@@ -399,19 +392,19 @@ class mainClass():
 
                         self.stopMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         #start_time = datetime.now()
-                        isFault = 2
+                        self.isFault = 2
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
 
                 # Laserleikkauksen mittaus
                 elif power_on == True and standby == True and laser == True and machine_state != MACHINE_STATE_RUNNING:
                     machine_state = MACHINE_STATE_RUNNING
 
-                    print("Laser ON:\n")
+                    print("Laser ON:")
 
                     # Laser ON and measuring started
                     if measuring_started == False:
                         #start_time = datetime.now()
-                        isFault = 3
+                        self.isFault = 3
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         measuring_started = True
 
@@ -420,7 +413,7 @@ class mainClass():
                         
                         self.stopMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         #start_time = datetime.now()
-                        isFault = 3
+                        self.isFault = 3
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         
                 schedule.run_pending()
@@ -438,6 +431,7 @@ class mainClass():
 
         #Reading Login JSON
         #Trying to connect MariaDB using .JSON file
+
         self.tryConnection()
 
 if __name__ == '__main__':
