@@ -262,7 +262,7 @@ class mainClass():
             isFaultMode = "LASER"
         
         print(f"Starting measuring {isFaultMode} mode.\nStarting time: "+str(self.start_time.strftime("%H:%M:%S")))
-        time.sleep(0.3)
+        time.sleep(0.2)
         
 
 #================================================================
@@ -288,7 +288,7 @@ class mainClass():
             print(datakey,":",datavalue)
         self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
         #self.start_time = datetime.now()
-        time.sleep(0.3)
+        time.sleep(0.2)
         
 
 #================================================================
@@ -417,7 +417,7 @@ class mainClass():
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         
                 schedule.run_pending()
-                time.sleep(0.3)
+                time.sleep(0.2)
 
         except KeyboardInterrupt:
             print("------------------")
