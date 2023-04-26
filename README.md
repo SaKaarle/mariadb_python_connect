@@ -69,7 +69,24 @@ sudo apt-get install libmariadb3 libmariadb-dev
  
 MariaDB pip asennus importattavalle MariaDB paketille
 ```
-pip3 install mariadb
+#Vanhempi
+sudo python3 -m pip install mariadb
+```
+Jos yrittää asentaa uusinta versiota esim 1.1.6, tulee virhe ilmoitus:
+
+```
+#MariaDB 1.0.11 versio on uusin mahdollinen päivitys ARM pohjasille laitteille.
+  × Getting requirements to build wheel did not run successfully.
+  │ exit code: 2
+  ╰─> [1 lines of output]
+      MariaDB Connector/Python requires MariaDB Connector/C >= 3.3.1, found version 3.1.16
+      [end of output]
+```
+
+Asentamalla [mariadb==1.0.11](https://mariadb-corporation.github.io/mariadb-connector-python/release.html#mariadb-connector-pyhon-1-0-11) saa viimeisimmän päivityksen Raspberry:lle.
+
+```
+sudo python3 -m pip install mariadb==1.0.11
 ```
  
 PHP paketti
