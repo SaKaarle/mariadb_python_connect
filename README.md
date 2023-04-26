@@ -113,14 +113,25 @@ hostname –I
 ```
 Selaimeen voidaan syöttää osoite `http://192.168.0.21/phpmyadmin` ja PHPMyAdmin kirjautumisvalikko pitäisi avautua.
 
-## SystemD startup konfigurointi
-```
-sudo apt install libsystemd-dev
-```
-Komento, jolla luodaan "Service"
+## Sovelluksen automaattinen käynnistys
+
+Linux Distroille on kehitetty monenlaisia sovelluksen automaattisia käynnistyspalveluita ja käyttäjä itse saa päättää mitä haluaa käyttää tai hyödyntää. Tässä esimerkissä olen käyttänyt SystemD. Vaihtoehtoisesti suosittelen [crontab](https://www.dexterindustries.com/howto/auto-run-python-programs-on-the-raspberry-pi/) yksinkertaisuuden takia. 
+
+# Crontab
+Crontab on yksinkertainen vaihtoehto laittamaan palveluita käyntiin laitteen käynnistyessä. Ohjeita löytyy erillaisille toiminnoille ja mitä halutaan saavuttaa vaikka Raspberry Pi / SBC käynnistyksessä.
+[Asennusohjeita](https://www.dexterindustries.com/howto/auto-run-python-programs-on-the-raspberry-pi/) seuraamalla asennetaan Crontab terminaalista `sudo apt install cron` 
+Tässä esimerkissä tein Raspberry Pi OS:n natiiville SystemD palvelulle käynnistyskäskyt.
+
+# SystemD startup konfigurointi
+
+Jos jostain syystä ei ole asennettuna `systemd` pakettia, se pystytään asentamaan komennolla: `sudo apt install libsystemd-dev` tälläisen paketinasennuksen jälkeen on suositeltavaa käynnistää laite uusiksi
+
+Komento, jolla luodaan oma "Service". 
 ```
 sudo nano /lib/systemd/system/rasplaser.service 
 ```
+korvaamalla "rasplaser" voidaan lisätä oma palvelunnimi. esim `sudo nano /lib/systemd/system/omapalvelualoitussovellus.service.`
+
 Tiedostoon rasplaser.service lisätään seuraavat komennot:
 
 ```
@@ -144,15 +155,10 @@ WantedBy=multi-user.target
 Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
 Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja `WorkingDirectory=/home/pi/jokinsijainti` saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää `chmod 755` tai muista oikeuksien lisäämisestä.
  
-Toinen yksinkertainen versio joka toimii asennettuani [NetworkManagerin](https://wiki.archlinux.org/title/NetworkManager). Tämä on stabiilimpi ja varmempi nettikonfiguroinneissa. Tarkemmat asennusohjeet löytyvät [Stack Exchange](https://raspberrypi.stackexchange.com/a/116808) sivustolta, mutta yksinkertaisesti:
+Toinen vaihtoehto ongelmien korjaamiseen on asentaa uusi [NetworkManagerin](https://wiki.archlinux.org/title/NetworkManager). Tämä on stabiilimpi ja varmempi nettikonfiguroinneissa ja tulee korvaamaan nykyisen dhcpcd. Tarkemmat asennusohjeet löytyvät [Stack Exchange](https://raspberrypi.stackexchange.com/a/116808) sivustolta, mutta yksinkertaisesti:
 
  
- 
-# Crontab
 
-Crontab on yksinkertainen vaihtoehto laittamaan palveluita käyntiin. Ohjeita löytyy erillaisille toiminnoille ja mitä halutaan saavuttaa vaikka Raspberry Pi / SBC käynnistyksessä.
-
-[Asennusohjeita](https://www.dexterindustries.com/howto/auto-run-python-programs-on-the-raspberry-pi/) seuraamalla asennetaan Crontab terminaalista `sudo apt install cron` 
 ```
 sudo apt install network-manager network-manager-gnome
 
@@ -221,7 +227,7 @@ Terminaaliin kirjoitettuna `sudo systemctl status rasplaser` nähdään, onko se
 ```
 rasplaser.service - Python Script LaserMachine
      Loaded: loaded (/lib/systemd/system/rasplaser.service; disabled; vendor pr>
-     Active: active (running) since Tue 2022-12-20 18:21:37 EET; 3s ago
+     Active: active (running) since Tue 2023-04-24 10:21:37 EET; 3s ago
    Main PID: 29502 (python)
       Tasks: 1 (limit: 8986)
         CPU: 134ms
@@ -231,4 +237,20 @@ rasplaser.service - Python Script LaserMachine
 Dec 20 18:21:37 rpam systemd[1]: Started Python Script LaserMachine.
 
 ```
-Suorittamalla tämän jälkeen `sudo reboot -h now` voidaan uudelleen käynnistyksen jälkeen kytkimiä aktivoimalla nähdä esim. HeidiSQL sovelluksella muutokset tietokantaan. Tai pöytäkoneella kirjautumalla PHPMyAdmin sivustolle tietokannalle oikeutetulle käyttäjätilille.
+Suorittamalla tämän jälkeen `sudo reboot -h now` voidaan uudelleen käynnistyksen jälkeen tarkistaa toimiiko automaattinen palvelunkäynnistys.
+Kirjoittamalla uudelleen `sudo systemctl status rasplaser` komentoriville ja tarkista onko palvelu aktiivinen ja mikä "Main PID" palvelulla on. Ylhäällä huomataan palvelun olevan 29502, eli mitä suurempi luku, sitä myöhässä se käynnistyy. Uudelleen käynnistämällä selviää oikea "Main PID" luku.
+
+```
+● rasplaser.service - Python Script LaserMachine
+     Loaded: loaded (/lib/systemd/system/rasplaser.service; enabled; vendor pre>
+     Active: active (running) since Tue 2023-04-24 10:30:28 EEST; 15s ago
+   Main PID: 917 (python)
+      Tasks: 2 (limit: 1629)
+        CPU: 8.463s
+     CGroup: /system.slice/rasplaser.service
+             └─917 /usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
+
+Apr 25 10:30:28 rpi3B systemd[1]: Started Python Script LaserMachine.
+
+```
+
