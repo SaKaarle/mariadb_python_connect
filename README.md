@@ -130,7 +130,7 @@ hostname –I
 ```
 Selaimeen voidaan syöttää osoite `http://192.168.0.21/phpmyadmin` ja PHPMyAdmin kirjautumisvalikko pitäisi avautua.
 
-#Sovelluksen automaattinen käynnistys
+# Sovelluksen automaattinen käynnistys
 
 Linux Distroille on kehitetty monenlaisia sovelluksen automaattisia käynnistyspalveluita ja käyttäjä itse saa päättää mitä haluaa käyttää tai hyödyntää. Tässä esimerkissä olen käyttänyt SystemD. Vaihtoehtoisesti suosittelen [crontab](https://www.dexterindustries.com/howto/auto-run-python-programs-on-the-raspberry-pi/) yksinkertaisuuden takia. 
 
