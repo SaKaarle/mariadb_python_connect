@@ -139,7 +139,7 @@ Crontab on yksinkertainen vaihtoehto laittamaan palveluita käyntiin laitteen k�
 [Asennusohjeita](https://www.dexterindustries.com/howto/auto-run-python-programs-on-the-raspberry-pi/) seuraamalla asennetaan Crontab terminaalista `sudo apt install cron` 
 Tässä esimerkissä tein Raspberry Pi OS:n natiiville SystemD palvelulle käynnistyskäskyt.
 
-##SystemD startup konfigurointi
+## SystemD startup konfigurointi
 
 Jos jostain syystä ei ole asennettuna `systemd` pakettia, se pystytään asentamaan komennolla: `sudo apt install libsystemd-dev` tälläisen paketinasennuksen jälkeen on suositeltavaa käynnistää laite uusiksi
 
