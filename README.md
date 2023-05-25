@@ -2,20 +2,22 @@
 
 Python koodi jolla kerätään dataa lähettämällä sitä MariaDB / MySQL tietokantaan. Raspberry Pi:stä lähtee kolme GPIO pinniä jotka ottaa yhteyden toiseen laitteeseen. Tässä työssä on otettu yhtyes laitteeseen hyödyntäen releitä jotka sieppaavat signaaleja.
 Python koodi on keskeneräinen, mutta käytetään tuotannossa.
-Sovelluksia joita käytetään:
-- Putty
+Sovelluksia joita käytetään Windows tietokoneella:
+- Putty (SSH yhteyden muodostaminen)
 - Visual Studio Code
-- MariaDB
-- [MariaDB ODBC Connector 3.1.X](https://mariadb.com/downloads/connectors/connectors-data-access/odbc-connector)
-- HeidiSQL
-- Power BI
+- Python 3.7
+- MariaDB (jos tietokanta asennetaan tietokoneelle ja dataa tuodaan Raspberry Pi:stä)
+- [MariaDB ODBC Connector 3.1.X](https://mariadb.com/downloads/connectors/connectors-data-access/odbc-connector) (Vaaditaan Power BI:n kanssa, että yhteys voidaan muodostaa)
+- HeidiSQL (Asentuu MariaDB sovelluksen yhteydessä halutessa)
+- Power BI (Kaavioiden luontiin ja datan visualisointi)
 
 ## Raspberry Pi tai vastaava yhden piirilevyn tietokone
 Vaatimukset yhden piirilevyn tietokoneelta:
 - Raspberry Pi (2 - 4)
 - GPIO pinnejä
 - Debian pohjautuva -linux distro.
-- Python versio 3.9
+- Python versio 3.7. Python versio voidaan asentaa 3.10 asti, mutta vaatii vianselvityksiä saadakseen esim. GPIO pinnien toimimaan. Tässä esimerkissä asensin [ohjeiden mukaan Python 3.9.9 version](https://linuxhint.com/update-python-raspberry-pi/)
+
 
 Raspberry Pi:lle MariaDB/MySQL tietokanta ja tarvittaessa tietokannan hallintaan graafisella käyttöjärjestelmä Apache2 ja phpMyAdmin. 
  
