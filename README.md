@@ -1,12 +1,25 @@
 # MariaDB Python Connection
 
-Koodin pätkää, 3 pinniä jotka ottaa yhteyden laitteeseen (invasiivinen) tuotantoon tarkoitettuihin laitteisiin
-Python skripti on puhdistusta vailla
+Python koodi jolla kerätään dataa lähettämällä sitä MariaDB / MySQL tietokantaan. Raspberry Pi:stä lähtee kolme GPIO pinniä jotka ottaa yhteyden toiseen laitteeseen. Tässä työssä on otettu yhtyes laitteeseen hyödyntäen releitä jotka sieppaavat signaaleja.
+Python koodi on keskeneräinen, mutta käytetään tuotannossa.
+Sovelluksia joita käytetään:
+- Putty
+- Visual Studio Code
+- MariaDB
+- (MariaDB ODBC Connector 3.1.X)[https://mariadb.com/downloads/connectors/connectors-data-access/odbc-connector]
+- HeidiSQL
+- Power BI
 
-## Raspberry Pi (3B+)
-Raspberryyn on asennettuna Apache 2 serveri, MariaDB/MySQL tietokanta ja phpMyAdmin
+## Raspberry Pi tai vastaava yhden piirilevyn tietokone
+Vaatimukset yhden piirilevyn tietokoneelta:
+- Raspberry Pi (2 - 4)
+- GPIO pinnejä
+- Debian pohjautuva -linux distro.
+- Python versio 3.9
+
+Raspberry Pi:lle MariaDB/MySQL tietokanta ja tarvittaessa tietokannan hallintaan graafisella käyttöjärjestelmä Apache2 ja phpMyAdmin. 
  
-MariaDB serverin asennus:
+MariaDB serverin asennus Raspberryyn:
 ```
 sudo apt install mariadb-server
 ```
