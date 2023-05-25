@@ -6,7 +6,7 @@ Sovelluksia joita käytetään:
 - Putty
 - Visual Studio Code
 - MariaDB
-- (https://mariadb.com/downloads/connectors/connectors-data-access/odbc-connector)[MariaDB ODBC Connector 3.1.X]
+- [MariaDB ODBC Connector 3.1.X](https://mariadb.com/downloads/connectors/connectors-data-access/odbc-connector)
 - HeidiSQL
 - Power BI
 
