@@ -4,6 +4,7 @@ Python koodi jolla kerätään dataa lähettämällä sitä MariaDB / MySQL tiet
 Python koodi on keskeneräinen, mutta käytetään tuotannossa.
 Sovelluksia joita käytetään Windows tietokoneella:
 - Putty (SSH yhteyden muodostaminen)
+- Raspberry Pi Imager (Käyttöjärjestelmän asennus SD-kortille)
 - Visual Studio Code
 - Python 3.7
 - MariaDB (jos tietokanta asennetaan tietokoneelle ja dataa tuodaan Raspberry Pi:stä)
@@ -13,6 +14,7 @@ Sovelluksia joita käytetään Windows tietokoneella:
 
 ## Raspberry Pi tai vastaava yhden piirilevyn tietokone
 Vaatimukset yhden piirilevyn tietokoneelta:
+- Vaihtoehtoisesti "Headless" debian käyttöjärjestelmä asennus. Pystytään Raspberry Pi Imager -sovelluksella esiasetukset (WLAN, kieli, käyttäjätili ja salasana) ja VNC yhteydellä etäyhteys laitteeseen.
 - Raspberry Pi (2 - 4)
 - GPIO pinnejä
 - Debian pohjautuva -linux distro.
@@ -77,8 +79,8 @@ GRANT SELECT, INSERT, DELETE, UPDATE ON db_esimerkki.laserdata TO 'käyttäjäni
 FLUSH PRIVILEGES;
 ```
 Jos yhteysongelmia ilmenee käyttäjätilin kanssa, voidaan kokeilla syöttää oikeus jokaiselle IP osoittelle. Tämä ei ole suositeltavaa tietoturva syistä: `CREATE USER 'käyttäjänimi'@'%.%.%.%' IDENTIFIED BY 'käyttäjänsalasana';` tai syöttää manuaalisesti IP osoite, josta pystytään ottamaan yhteyttä.
-Esim. `CREATE USER 'käyttäjänimi'@'192.168.178.20' IDENTIFIED BY 'käyttäjänsalasana';`
-Tai reitittimen määrittämästä IP osoite alueelta: `CREATE USER 'käyttäjänimi'@'192.168.178.%' IDENTIFIED BY 'käyttäjänsalasana';`
+Esim. `CREATE USER 'käyttäjänimi'@'192.168.0.21' IDENTIFIED BY 'käyttäjänsalasana';`
+Tai reitittimen määrittämästä IP osoite alueelta: `CREATE USER 'käyttäjänimi'@'192.168.0.%' IDENTIFIED BY 'käyttäjänsalasana';`
  
 
 Raspberry Pi:n vaadittavat asennukset Python Connectorille
@@ -91,17 +93,17 @@ MariaDB pip asennus importattavalle MariaDB paketille
 #Vanhempi
 sudo python3 -m pip install mariadb
 ```
+
 Jos yrittää asentaa uusinta versiota esim 1.1.6, tulee virhe ilmoitus:
 
 ```
-#MariaDB 1.0.11 versio on uusin mahdollinen päivitys ARM pohjasille laitteille.
   × Getting requirements to build wheel did not run successfully.
   │ exit code: 2
   ╰─> [1 lines of output]
       MariaDB Connector/Python requires MariaDB Connector/C >= 3.3.1, found version 3.1.16
       [end of output]
 ```
-
+MariaDB 1.0.11 versio on uusin mahdollinen päivitys ARM pohjasille laitteille.
 Asentamalla [mariadb==1.0.11](https://mariadb-corporation.github.io/mariadb-connector-python/release.html#mariadb-connector-pyhon-1-0-11) saa viimeisimmän päivityksen Raspberry:lle.
 
 ```
@@ -163,59 +165,14 @@ Tässä esimerkissä tein Raspberry Pi OS:n natiiville SystemD palvelulle käynn
 
 Jos jostain syystä ei ole asennettuna `systemd` pakettia, se pystytään asentamaan komennolla: `sudo apt install libsystemd-dev` tälläisen paketinasennuksen jälkeen on suositeltavaa käynnistää laite uusiksi
 
-Komento, jolla luodaan oma "Service". 
+Terminaaliin kirjoitetaan komento, jolla luodaan oma "Service" laitteelle. 
 ```
 sudo nano /lib/systemd/system/rasplaser.service 
 ```
 korvaamalla "rasplaser" voidaan lisätä oma palvelunnimi. esim `sudo nano /lib/systemd/system/omapalvelualoitussovellus.service.`
 
-Tiedostoon rasplaser.service lisätään seuraavat komennot:
-
-```
-[Unit]
-##Human readable name of the unit
-Description=Python Script LaserMachine
-After=network.target multi-user.target
-
-[Service]
-#User=root
-Type=idle
-ExecStart=/usr/bin/python3 -u /home/pi/Desktop/sshVSC/mariadbCon.py
-WorkingDirectory=/home/pi/Desktop/sshVSC
-Restart=on-failure
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
- 
-Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
-Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja `WorkingDirectory=/home/pi/jokinsijainti` saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää `chmod 755` tai muista oikeuksien lisäämisestä.
- 
-Toinen vaihtoehto ongelmien korjaamiseen on asentaa uusi [NetworkManagerin](https://wiki.archlinux.org/title/NetworkManager). Tämä on stabiilimpi ja varmempi nettikonfiguroinneissa ja tulee korvaamaan nykyisen dhcpcd. Tarkemmat asennusohjeet löytyvät [Stack Exchange](https://raspberrypi.stackexchange.com/a/116808) sivustolta, mutta yksinkertaisesti:
-
- 
-
-```
-sudo apt install network-manager network-manager-gnome
-
-sudo systemctl enable NetworkManager
-sudo systemctl start NetworkManager
-sudo systemctl disable dhcpcd
-
-sudo reboot -h now
-```
-
-On tärkeää tarkistaa DHCP -palvelun tila ettei se ole häiritsemässä taustalla.
-
-```
-pi@rpi3B:~ $ sudo systemctl status dhcpcd
-● dhcpcd.service - DHCP Client Daemon
-     Loaded: loaded (/lib/systemd/system/dhcpcd.service; enabled; vendor preset: enabled)
-     Active: inactive (dead)
-       Docs: man:dhcpcd(8)
-
-```
+Tässä esimerkissä loin `rasplaser.service` tiedoston jonne laitetaan halutut komennot ja määritykset käynnistyessä. 
+Palvelu tiedostoon `rasplaser.service` lisätään seuraavat komennot:
 
 ```
 [Unit]
@@ -228,10 +185,9 @@ Type=idle
 ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
 [Install]
 WantedBy=multi-user.target
-
 ```
 
-Viimeisimmässä muokkauksessani löysin mahdollisen syyn, miksei `rasplaser.service` lähtenyt käyntiin. `After=network.target` viivästyttää vielä Python skriptin aktivoinnin, että MariaDB / MySQL Service pystyvät aktivoitumaan. `sudo systemctl status rasplaser` antoi virheeksi, ettei kykenyt lukemaan MariaDB .json tiedosta, jossa on kirjautumistiedot.
+Tämä on tällä hetkellä minulla toimiva rasplaser.service tiedosto. README:n lopusta löytyy eri vaihtoehtoja ja havaittuja virheitä ja korjausehdotuksia.
  
 
 CTRL - X ja Y ja Enter. Tiedostoon tehdyt muutokset tallennetaan.
@@ -290,4 +246,80 @@ Kirjoittamalla uudelleen `sudo systemctl status rasplaser` komentoriville ja tar
 Apr 25 10:30:28 rpi3B systemd[1]: Started Python Script LaserMachine.
 
 ```
+
+#HAVAITUT VIRHEET JA ONGELMATILANTEET
+
+## Palvelu ei käynnisty Raspberry Pi:n yhtyedessä
+-Tarkista verkkoyhteys, myös Wi-Fi yhteys jos langatonverkkoyhteys on käytössä.
+
+## Palvelu ei käynnisty laitteen käynnistyksen yhteydessä, mutta käynnistyy `sudo systemctl restart omapalvelu.service` jälkeen.
+
+Tässä on iso selvitys tehty:
+
+```
+[Unit]
+##Human readable name of the unit
+Description=Python Script LaserMachine
+After=network.target multi-user.target
+
+[Service]
+#User=root
+Type=idle
+ExecStart=/usr/bin/python3 -u /home/pi/Desktop/sshVSC/mariadbCon.py
+WorkingDirectory=/home/pi/Desktop/sshVSC
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+ 
+Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
+Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja `WorkingDirectory=/home/pi/jokinsijainti` saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää `chmod 755` tai muista oikeuksien lisäämisestä.
+ 
+Näiden lisäksi, [Python pakettien](https://pypi.org/) asennuksia voidaan joutua suorittamaan uudelleen. Paketit saattavat "kadota" tai "hukkua" käyttöoikeuksista JOS käytetään `User=root` käyttäjää palvelukonfiguraatiossa. Uudelleen asennukset on suositeltavaa tehdä `sudo`:lla saadakseen pääkäyttäjä oikeudet ja `python3`:lla varmistetaan että asennetaan oikealle Python versiolle paketit. Esimerkki komento terminaaliin: `sudo python3 -m pip install [package-name]`
+ 
+Minulle ilmeni vastaavia ongelmia ja tiedä tarkempia syitä, mitkä tekijät ovat tuoneet nämä viat vastaan. Tälläisissä projekteissa on myös suotavaa rakentaa `venv` eli [virtuaali ympäristö](https://docs.python.org/3/library/venv.html) jonne asennetaan omat halutut ja tarvittavat paketit, sekä `rasplaser.service` tiedostoon määritetään sijainti mistä tämä sovellus ajetaan hyödyntäen virtuaali ympäristöä. Tässäkin tapauksessa, jos on syötetty arvot `User=root` palvelutiedostoon, on tärkeä myöntää kansiolle `chmod 755` kirjoitus- ja lukuoikeudet.
+ 
+```
+[Unit]
+#Human readable name of the unit
+Description=Python Script LaserMachine
+After=multi-user.target
+[Service]
+User=pi
+Type=idle
+ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
+[Install]
+WantedBy=multi-user.target
+```
+
+Viimeisimmässä havainnoissani huomasin virheen ja selvitin, miksei `rasplaser.service` lähtenyt käyntiin. `After=network.target` viivästyttää vielä Python skriptin aktivoinnin, että MariaDB / MySQL Service pystyvät aktivoitumaan. `sudo systemctl status rasplaser` antoi virheeksi, ettei kykenyt lukemaan MariaDB .json tiedosta, jossa on kirjautumistiedot.
+ 
+Myös eri vaihtoehto ongelmien korjaamiseen on asentaa uusi [NetworkManagerin](https://wiki.archlinux.org/title/NetworkManager). Tämä on stabiilimpi ja varmempi nettikonfiguroinneissa ja tulee korvaamaan nykyisen dhcpcd. Tarkemmat asennusohjeet löytyvät [Stack Exchange](https://raspberrypi.stackexchange.com/a/116808) sivustolta, mutta yksinkertaisesti:
+
+```
+sudo apt install network-manager network-manager-gnome
+
+sudo systemctl enable NetworkManager
+sudo systemctl start NetworkManager
+sudo systemctl disable dhcpcd
+
+sudo reboot -h now
+```
+
+On tärkeää tarkistaa DHCP -palvelun tila ettei se ole häiritsemässä taustalla.
+
+```
+pi@rpi3B:~ $ sudo systemctl status dhcpcd
+● dhcpcd.service - DHCP Client Daemon
+     Loaded: loaded (/lib/systemd/system/dhcpcd.service; enabled; vendor preset: enabled)
+     Active: inactive (dead)
+       Docs: man:dhcpcd(8)
+
+```
+
+
+
+
 
