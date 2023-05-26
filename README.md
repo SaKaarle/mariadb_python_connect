@@ -247,7 +247,7 @@ Apr 25 10:30:28 rpi3B systemd[1]: Started Python Script LaserMachine.
 
 ```
 
-#HAVAITUT VIRHEET JA ONGELMATILANTEET
+# HAVAITUT VIRHEET JA ONGELMATILANTEET
 
 ## Palvelu ei käynnisty Raspberry Pi:n yhtyedessä
 -Tarkista verkkoyhteys, myös Wi-Fi yhteys jos langatonverkkoyhteys on käytössä.
