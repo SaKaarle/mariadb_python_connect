@@ -76,7 +76,7 @@ CREATE USER 'käyttäjänimi'@'%' IDENTIFIED BY 'käyttäjänsalasana';
 GRANT SELECT, INSERT, DELETE, UPDATE ON db_esimerkki.laserdata TO 'käyttäjänimi'@'%';
 FLUSH PRIVILEGES;
 ```
-Jos yhteysongelmia ilmenee käyttäjätilin kanssa, voidaan kokeilla syöttää `CREATE USER 'käyttäjänimi'@'%.%.%.%' IDENTIFIED BY 'käyttäjänsalasana';` tai syöttää manuaalisesti IP osoite, josta pystytään ottamaan yhteyttä.
+Jos yhteysongelmia ilmenee käyttäjätilin kanssa, voidaan kokeilla syöttää oikeus jokaiselle IP osoittelle. Tämä ei ole suositeltavaa tietoturva syistä: `CREATE USER 'käyttäjänimi'@'%.%.%.%' IDENTIFIED BY 'käyttäjänsalasana';` tai syöttää manuaalisesti IP osoite, josta pystytään ottamaan yhteyttä.
 Esim. `CREATE USER 'käyttäjänimi'@'192.168.178.20' IDENTIFIED BY 'käyttäjänsalasana';`
 Tai reitittimen määrittämästä IP osoite alueelta: `CREATE USER 'käyttäjänimi'@'192.168.178.%' IDENTIFIED BY 'käyttäjänsalasana';`
  
