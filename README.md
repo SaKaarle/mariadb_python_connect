@@ -59,8 +59,8 @@ CREATE TABLE `laserdata` (
 	`machine_id` VARCHAR(50) NULL DEFAULT NULL COLLATE 'utf8mb4_general_ci',
 	`start_time` DATETIME NULL DEFAULT NULL,
 	`end_time` DATETIME NULL DEFAULT NULL,
-	`duration` TIME NULL DEFAULT NULL,
-	`isFault` TINYINT(1) NULL DEFAULT NULL
+	`duration` VARCHAR(50) NULL DEFAULT NULL,
+	`isFault` TINYINT(10) NULL DEFAULT NULL
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
@@ -76,6 +76,10 @@ CREATE USER 'käyttäjänimi'@'%' IDENTIFIED BY 'käyttäjänsalasana';
 GRANT SELECT, INSERT, DELETE, UPDATE ON db_esimerkki.laserdata TO 'käyttäjänimi'@'%';
 FLUSH PRIVILEGES;
 ```
+Jos yhteysongelmia ilmenee käyttäjätilin kanssa, voidaan kokeilla syöttää `CREATE USER 'käyttäjänimi'@'%.%.%.%' IDENTIFIED BY 'käyttäjänsalasana';` tai syöttää manuaalisesti IP osoite, josta pystytään ottamaan yhteyttä.
+Esim. `CREATE USER 'käyttäjänimi'@'192.168.178.20' IDENTIFIED BY 'käyttäjänsalasana';`
+Tai reitittimen määrittämästä IP osoite alueelta: `CREATE USER 'käyttäjänimi'@'192.168.178.%' IDENTIFIED BY 'käyttäjänsalasana';`
+ 
 
 Raspberry Pi:n vaadittavat asennukset Python Connectorille
 ```
