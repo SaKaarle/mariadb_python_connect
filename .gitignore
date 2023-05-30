@@ -8,4 +8,7 @@ __pycache__
 .vscode/launch.json
 jsonBackupMachine1.json
 testiSecur.py
-#mariadbCon_backup.py
+mariadbCon_backup.py
+mariadbCon_backup2.py
+mariadbCon4release.py
+remoteGPIO.py
