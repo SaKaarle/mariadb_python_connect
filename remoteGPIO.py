@@ -21,7 +21,6 @@ MACHINE_STATE_PART_READY = 3
 MACHINE_STATE_ALARM = 4
 # program started
 print("Program running..")
-print("test")
 # variables
 machine_id ="Byfib8025"
 measuring_started = False
