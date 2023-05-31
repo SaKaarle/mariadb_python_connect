@@ -1,4 +1,4 @@
-# MariaDB Python Connection
+# Laserleikkurin datan keruu ja visualisointi.
 
 Python koodi jolla kerätään dataa lähettämällä sitä MariaDB / MySQL tietokantaan. Raspberry Pi:stä lähtee kolme GPIO pinniä jotka ottaa yhteyden toiseen laitteeseen. Tässä työssä on otettu yhtyes laitteeseen hyödyntäen releitä jotka sieppaavat signaaleja.
 Python koodi on keskeneräinen, mutta käytetään tuotannossa.
