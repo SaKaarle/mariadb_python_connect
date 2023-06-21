@@ -41,7 +41,7 @@ Merkittävät muutokset julkaisuun
 - [Tulokset](#tulokset)
 - [Lisenssi](#lisenssi)
 - [Tekijät](#tekijät)
-- 
+ 
 
 # Teknologiapilotti
 TehoData-hankkeen pilotissa 3 pyrittiin luomaan tuotannon seurannan datankeruu sovellus hyödyntäen yhdenpiirilevyn tietokonetta ja avoimen lähdekoodin tietokantaa.
