@@ -53,9 +53,30 @@ TehoData-hankkeen pilotissa 3 pyrittiin luomaan tuotannon seurannan datankeruu s
 Hanke rahoitetaan REACT-EU-välineen määrärahoista osana unionin covid-19-pandemian johdosta toteuttamia toimia.
 TehoDatan hankesivut löytyvät osoitteesta [https://projektit.seamk.fi/alykkaat-teknologiat/tehodata/](https://projektit.seamk.fi/alykkaat-teknologiat/tehodata/)
 
+# Kuvaus
+Python koodi jolla kerätään dataa lähettämällä sitä MariaDB / MySQL tietokantaan. Raspberry Pi:stä lähtee kolme GPIO pinniä jotka ottaa yhteyden toiseen laitteeseen. Tässä työssä on otettu yhtyes laitteeseen hyödyntäen releitä jotka sieppaavat signaaleja.
 
 # Tavoitteet
-Pilotissa kehitettiin sovellusta jolla pystytään keräämään dataa seuratakseen tuotantoa.
+Pilotissa kehitettiin sovellusta Raspberry Pi 4 laitteelle jolla pystytään keräämään dataa seuratakseen tuotantoa. Kerättyä dataa pystytään visuaalisesti katsoa kaavioista.
+
+# Toimenpiteet
+Raspberry Pi 4 valmisteltiin pilottiyritystä varten tuotannon seurantaan. Kyseiselle Raspberry Pi:lle kehitettiin sovellus jolla pystytään kaappaamaan kolmesta eri pinnistä dataa. Nämä datat tuovat esille, onko laite sammutettu, käynnistetty, odottamassa toimeenpiteitä ja leikkaustilassa. Python -ohjelmointikielellä rakennettu sovellus luo näistä tiedoista dataa joka siirretään pilottiyrityksen omaan MariaDB tietokantaan, jota voidaan visuaalisesti käsitellä eri sovelluksissa. 
+
+# Asennus
+
+## Vaadittavat asennekuset Windows -tietokoneelle
+Lista sovelluksista:
+- Putty (SSH yhteyden muodostaminen)
+- Raspberry Pi Imager (Käyttöjärjestelmän asennus SD-kortille)
+- Visual Studio Code tai jokin muu IDE -sovellus
+- Python 3.7
+- MariaDB (jos tietokanta asennetaan tietokoneelle ja dataa tuodaan Raspberry Pi:stä)
+- [MariaDB ODBC Connector 3.1.X](https://mariadb.com/downloads/connectors/connectors-data-access/odbc-connector) (Vaaditaan Power BI:n kanssa, että yhteys voidaan muodostaa)
+- HeidiSQL (Asentuu MariaDB sovelluksen yhteydessä halutessa)
+- Power BI (Kaavioiden luontiin ja datan visualisointi)
+
+Tästä GitHub repositorista tarpeellisin ladattava on vain [mariadbCon.py](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/mariadbCon.py) -tiedosto joka siirretään Raspberry Pi:lle / yhden piirilevyn tietokoneeseen.
+
 
 ## Raspberry Pi tai vastaava yhden piirilevyn tietokone
 Vaatimukset yhden piirilevyn tietokoneelta:
@@ -65,7 +86,7 @@ Vaatimukset yhden piirilevyn tietokoneelta:
 - Debian pohjautuva -linux distro.
 - Python versio 3.7. Python versio voidaan asentaa 3.10 asti, mutta vaatii vianselvityksiä saadakseen esim. GPIO pinnien toimimaan. Tässä esimerkissä asensin [ohjeiden mukaan Python 3.9.16 version](https://linuxhint.com/update-python-raspberry-pi/)
 
-
+## MariaDB tietokannan asennus
 Raspberry Pi:lle MariaDB/MySQL tietokanta ja tarvittaessa tietokannan hallintaan graafisella käyttöjärjestelmä Apache2 ja phpMyAdmin. 
  
 MariaDB serverin asennus Raspberryyn:
@@ -86,8 +107,10 @@ sudo mysql -u root -p
 ```
 MySQL kysyy asennuksessa syötettyä root -salasanaa. Syöttämällä sen varmistetaan MariaDB toimivuus.
  
-MariaDB databasen luonti:
- 
+## MariaDB databasen luonti
+
+Kirjauduttua sisään MariaDB tietokantaan, voidaan rakentaa oma tietokanta ja taulukko.
+
 ```
 DROP DATABASE IF EXISTS db_esimerkki;
 CREATE DATABASE db_esimerkki;
@@ -99,6 +122,11 @@ Taulukon voi luoda käyttämällä GUI:ta käyttävää HeidiSQL:ää pöytäkon
 Tässä esimerkissä olen luonut HeidiSQL sovelluksella taulukon ja kopioinut skriptin siitä.
  
 Taulukon luonti datasyöttöä varten:
+
+HUOM!
+
+Yleisesti "duration" eli kesto -dataa on hyvä mitata sekuntteina. mariadbCon.py tiedostossa luodaan `"hh:mm:ss"` dataa joka on virheellinen tapa merkata kesto. Power BI:ssä esimerkisi vaaditaan muuttaa "duration" data sekunteiksi pilkkomalla `hh:mm:ss` omiin osiinsa ja käyttämällä laskentakaavioita saadakseen oikean tuloksen ja muuntaa takaisin `hh:mm:ss` muotoon.
+
 ```
 DROP TABLE if exists laserdata;
 
@@ -128,12 +156,12 @@ Esim. `CREATE USER 'käyttäjänimi'@'192.168.0.21' IDENTIFIED BY 'käyttäjäns
 Tai reitittimen määrittämästä IP osoite alueelta: `CREATE USER 'käyttäjänimi'@'192.168.0.%' IDENTIFIED BY 'käyttäjänsalasana';`
  
 
-Raspberry Pi:n vaadittavat asennukset Python Connectorille
+## Raspberry Pi:n vaadittavat asennukset Python Connectorille
 ```
 sudo apt-get install libmariadb3 libmariadb-dev
 ```
  
-MariaDB pip asennus importattavalle MariaDB paketille
+## MariaDB pip asennus importattavalle MariaDB paketille
 ```
 #Vanhempi
 sudo python3 -m pip install mariadb
@@ -155,7 +183,7 @@ Asentamalla [mariadb==1.0.11](https://mariadb-corporation.github.io/mariadb-conn
 sudo python3 -m pip install mariadb==1.0.11
 ```
  
-PHP paketti
+## phpMyAdmin paketti
 ```
 sudo apt install phpmyadmin
 ```
@@ -196,7 +224,7 @@ hostname –I
 ```
 Selaimeen voidaan syöttää osoite `http://192.168.0.21/phpmyadmin` ja PHPMyAdmin kirjautumisvalikko pitäisi avautua.
 
-# Sovelluksen automaattinen käynnistys
+## Sovelluksen automaattinen käynnistys
  
 Linux Distroille on kehitetty monenlaisia sovelluksen automaattisia käynnistyspalveluita ja käyttäjä itse saa päättää mitä haluaa käyttää tai hyödyntää. Tässä esimerkissä olen käyttänyt SystemD. Vaihtoehtoisesti suosittelen [crontab](https://www.dexterindustries.com/howto/auto-run-python-programs-on-the-raspberry-pi/) yksinkertaisuuden takia. 
 
@@ -207,7 +235,7 @@ Crontab on yksinkertainen vaihtoehto laittamaan palveluita käyntiin laitteen k�
 Tässä esimerkissä tein Raspberry Pi OS:n natiiville SystemD palvelulle käynnistyskäskyt.
 
 ## SystemD startup konfigurointi
-
+[SystemD config example](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/Putty%20Sudo%20Nano%20ikkuna.png)
 Jos jostain syystä ei ole asennettuna `systemd` pakettia, se pystytään asentamaan komennolla: `sudo apt install libsystemd-dev` tälläisen paketinasennuksen jälkeen on suositeltavaa käynnistää laite uusiksi
 
 Terminaaliin kirjoitetaan komento, jolla luodaan oma "Service" laitteelle. 
