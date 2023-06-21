@@ -86,6 +86,7 @@ Vaatimukset yhden piirilevyn tietokoneelta:
 - Debian pohjautuva -linux distro.
 - Python versio 3.7. Python versio voidaan asentaa 3.10 asti, mutta vaatii vianselvityksiä saadakseen esim. GPIO pinnien toimimaan. Tässä esimerkissä asensin [ohjeiden mukaan Python 3.9.16 version](https://linuxhint.com/update-python-raspberry-pi/)
 
+
 ## MariaDB tietokannan asennus
 Raspberry Pi:lle MariaDB/MySQL tietokanta ja tarvittaessa tietokannan hallintaan graafisella käyttöjärjestelmä Apache2 ja phpMyAdmin. 
  
