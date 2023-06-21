@@ -4,7 +4,7 @@
 ![Älykkäät teknologiat](https://storage.googleapis.com/seamk-production/2022/04/2b1d63e0-alykkaat-teknologiat_highres_2022-768x336.jpg)
 ![ESR](https://storage.googleapis.com/seamk-production/2022/02/da4e4541-eu-lippu-290x300.png) ![Vipuvoimaa](https://storage.googleapis.com/seamk-production/2022/02/8d432b35-vipuvoimaa-eulta-logo-300x212.png) ![ELY-keskus](https://storage.googleapis.com/seamk-production/2021/08/5e942eac-ely-keskus_logo-300x105.png) ![SeAMK](https://storage.googleapis.com/seamk-production/2022/02/79a4ce1b-seamk_vaaka_fi_en_rgb_1200x486-300x122.jpg)
 
-# Laserleikkurin datan keruu ja visualisointi.
+# Laserleikkurin datan keruu ja visualisointi
 
 Python koodi jolla kerätään dataa lähettämällä sitä MariaDB / MySQL tietokantaan. Raspberry Pi:stä lähtee kolme GPIO pinniä jotka ottaa yhteyden toiseen laitteeseen. Tässä työssä on otettu yhtyes laitteeseen hyödyntäen releitä jotka sieppaavat signaaleja.
 Python koodi on keskeneräinen, mutta käytetään tuotannossa.
@@ -17,6 +17,45 @@ Sovelluksia joita käytetään Windows tietokoneella:
 - [MariaDB ODBC Connector 3.1.X](https://mariadb.com/downloads/connectors/connectors-data-access/odbc-connector) (Vaaditaan Power BI:n kanssa, että yhteys voidaan muodostaa)
 - HeidiSQL (Asentuu MariaDB sovelluksen yhteydessä halutessa)
 - Power BI (Kaavioiden luontiin ja datan visualisointi)
+
+# Julkaisun historiatiedot
+Merkittävät muutokset julkaisuun
+
+|pvm|Muutokset|Tekijä|
+|---|---|---|
+|21.6.2023|Versio 1.0 julkaisu|Saku Kaarlejärvi|
+|21.6.2023|Zenodo julkaisu|Saku Kaarlejärvi|
+
+# Sisällysluettelo
+- [Julkaisun nimi](#laserleikkurin-datan-keruu-ja-visualisointi)
+- [Julkaisun historiatiedot](#julkaisun-historiatiedot)
+- [Sisällysluettelo](#sisällysluettelo)
+- [Teknologiapilotti](#teknologiapilotti)
+- [Hanketiedot](#hanketiedot)
+- [Kuvaus](#kuvaus)
+- [Tavoitteet](#tavoitteet)
+- [Toimenpiteet](#toimenpiteet)
+- [Asennus](#asennus)
+- [Vaatimukset](#vaatimukset)
+- [Käyttö/käynnistys](#käyttökäynnistys)
+- [Tulokset](#tulokset)
+- [Lisenssi](#lisenssi)
+- [Tekijät](#tekijät)
+- 
+
+# Teknologiapilotti
+TehoData-hankkeen pilotissa 3 pyrittiin luomaan tuotannon seurannan datankeruu sovellus hyödyntäen yhdenpiirilevyn tietokonetta ja avoimen lähdekoodin tietokantaa.
+
+# Hanketiedot
+- Hankkeen nimi: Datasta ketteryyttä ja uutta liiketoimintaa Etelä-Pohjanmaan pk-yrityksiin (TehoData)
+- Rahoittaja: Keski-Suomen ELY/ Euroopan sosiaalirahasto ESR
+- Aikataulu: 1.9.2021–31.10.2023
+Hanke rahoitetaan REACT-EU-välineen määrärahoista osana unionin covid-19-pandemian johdosta toteuttamia toimia.
+TehoDatan hankesivut löytyvät osoitteesta [https://projektit.seamk.fi/alykkaat-teknologiat/tehodata/](https://projektit.seamk.fi/alykkaat-teknologiat/tehodata/)
+
+
+# Tavoitteet
+Pilotissa kehitettiin sovellusta jolla pystytään keräämään dataa seuratakseen tuotantoa.
 
 ## Raspberry Pi tai vastaava yhden piirilevyn tietokone
 Vaatimukset yhden piirilevyn tietokoneelta:
