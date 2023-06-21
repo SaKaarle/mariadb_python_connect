@@ -6,7 +6,7 @@
 
 # Laserleikkurin datan keruu ja visualisointi
 
-Python koodi jolla kerätään dataa lähettämällä sitä MariaDB / MySQL tietokantaan. Raspberry Pi:stä lähtee kolme GPIO pinniä jotka ottaa yhteyden toiseen laitteeseen. Tässä työssä on otettu yhtyes laitteeseen hyödyntäen releitä jotka sieppaavat signaaleja.
+Yhden piirilevyn tietokone, johon on rakennettu Python sovellus keräämään dataa toisesta laitteesta ja lähettämällä sitä MariaDB / MySQL tietokantaan. Raspberry Pi:stä lähtee kolme GPIO pinniä jotka ottaa yhteyden toiseen laitteeseen. Tässä työssä on otettu yhtyes laitteeseen hyödyntäen releitä jotka sieppaavat signaaleja.
 Python koodi on keskeneräinen, mutta käytetään tuotannossa.
 Sovelluksia joita käytetään Windows tietokoneella:
 - Putty (SSH yhteyden muodostaminen)
@@ -35,9 +35,9 @@ Merkittävät muutokset julkaisuun
 - [Kuvaus](#kuvaus)
 - [Tavoitteet](#tavoitteet)
 - [Toimenpiteet](#toimenpiteet)
-- [Asennus](#asennus)
-- [Vaatimukset](#vaatimukset)
-- [Käyttö/käynnistys](#käyttökäynnistys)
+- [Asennus ja käyttö](#asennus-ja-käyttö)
+- [Havaitut virheet ja ongelmatilanteet](#HAVAITUT-VIRHEET-JA-ONGELMATILANTEET)
+- [Vaatimukset](#laserleikkurin-datan-keruu-ja-visualisointi)
 - [Tulokset](#tulokset)
 - [Lisenssi](#lisenssi)
 - [Tekijät](#tekijät)
@@ -62,7 +62,7 @@ Pilotissa kehitettiin sovellusta Raspberry Pi 4 laitteelle jolla pystytään ker
 # Toimenpiteet
 Raspberry Pi 4 valmisteltiin pilottiyritystä varten tuotannon seurantaan. Kyseiselle Raspberry Pi:lle kehitettiin sovellus jolla pystytään kaappaamaan kolmesta eri pinnistä dataa. Nämä datat tuovat esille, onko laite sammutettu, käynnistetty, odottamassa toimeenpiteitä ja leikkaustilassa. Python -ohjelmointikielellä rakennettu sovellus luo näistä tiedoista dataa joka siirretään pilottiyrityksen omaan MariaDB tietokantaan, jota voidaan visuaalisesti käsitellä eri sovelluksissa. 
 
-# Asennus
+# Asennus ja käyttö
 
 ## Vaadittavat asennekuset Windows -tietokoneelle
 Lista sovelluksista:
@@ -320,7 +320,8 @@ Apr 25 10:30:28 rpi3B systemd[1]: Started Python Script LaserMachine.
 
 ```
 
-# HAVAITUT VIRHEET JA ONGELMATILANTEET
+
+# Havaitut virheet ja ongelmatilanteet
 
 ## Palvelu ei käynnisty Raspberry Pi:n yhtyedessä
 -Tarkista verkkoyhteys, myös Wi-Fi yhteys jos langatonverkkoyhteys on käytössä.
@@ -392,7 +393,13 @@ pi@rpi3B:~ $ sudo systemctl status dhcpcd
 
 ```
 
+# Tulokset
+Tulossa pian...
 
+# Lisenssi
+Dokumentit lisensoitu:
+- [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+  
+# Tekijät
 
-
-
+Saku Kaarlejärvi
