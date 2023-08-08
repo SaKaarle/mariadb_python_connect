@@ -343,7 +343,7 @@ Tässä Python ohjelmassa ovat GPIO pinnit 23, 24 ja 25 ovat valittuna. Pinnit o
  
 ## Muutoksia ohjelmakoodiin
  
-Ohjelmakoodiin on määritettävä muutoksia saadakseen se toimivaksi omaan käyttöön. Lataamalla ja siirtämällä `mariadbCon.py` -tiedoston on varmistettava, että se on [SystemD käynnistyspalvelun mukaisesti](##SystemD_startup_konfigurointi) `rasplaser.service` tiedostossa- määritettyyn tiedostosijainnin mukaisesti. Muuten ohjelma vain käynnisty ja ei tee mitään. 
+Ohjelmakoodiin on määritettävä muutoksia saadakseen se toimivaksi omaan käyttöön. Lataamalla ja siirtämällä `mariadbCon.py` -tiedoston on varmistettava, että se on [SystemD käynnistyspalvelun mukaisesti](#SystemD-startup-konfigurointi) `rasplaser.service` tiedostossa- määritettyyn tiedostosijainnin mukaisesti. Muuten ohjelma vain käynnisty ja ei tee mitään. 
  
 ![Tiedostopolku kuvankaappaus](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/tiedostopolku.png)
  
