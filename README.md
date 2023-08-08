@@ -36,6 +36,7 @@ Merkittävät muutokset julkaisuun
 - [Tavoitteet](#tavoitteet)
 - [Toimenpiteet](#toimenpiteet)
 - [Asennus ja käyttö](#asennus-ja-käyttö)
+- [Python ohjelman käyttö](#Python-ohjelman-käyttö)
 - [Havaitut virheet ja ongelmatilanteet](#HAVAITUT-VIRHEET-JA-ONGELMATILANTEET)
 - [Vaatimukset](#laserleikkurin-datan-keruu-ja-visualisointi)
 - [Tulokset](#tulokset)
@@ -320,6 +321,18 @@ Kirjoittamalla uudelleen `sudo systemctl status rasplaser` komentoriville ja tar
 Apr 25 10:30:28 rpi3B systemd[1]: Started Python Script LaserMachine.
 
 ```
+
+# Python ohjelman käyttö
+
+[Tiedosto mariadbCon.py](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/mariadbCon.py) on ladattavissa ja siirrettävissä käyttöönottoa varten määritettyyn kansioon, kuten SystemD esimerkissäni olen käyttänyt `/home/pi/Desktop/sshVSC/mariadbCon.py` osoitetta.
+Python koodi tarvitsee muutoksia, jotka on `mariadbCon.py` -tiedostoon merkitty `#` -kommentteina.
+![Selitys visuaalisesti mikä on kommentti.](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/T%C3%A4m%C3%A4%20on%20kommentti.png)
+
+Risuaita rivinalussa on kommentti, jota ohjelma ei pysty lukemaan. Sinne voidaan kirjoittaa mitä vain eikä se häiritse ohjelman suorittamista.
+ 
+Esimerkkikuva:
+![Pinni taulukko Raspberry PI:lle selitettynä](https://cdn.sparkfun.com/assets/learn_tutorials/1/5/9/5/GPIO.png)
+
 
 
 # Havaitut virheet ja ongelmatilanteet
