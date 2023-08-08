@@ -342,7 +342,13 @@ Tässä Python ohjelmassa ovat GPIO pinnit 23, 24 ja 25 ovat valittuna. Pinnit o
 |Laseri päällä|Laite on IDLE -tilassa|Laite on päällä|
  
 ## Muutoksia ohjelmakoodiin
+ 
+Ohjelmakoodiin on määritettävä muutoksia saadakseen se toimivaksi omaan käyttöön. Lataamalla ja siirtämällä `mariadbCon.py` -tiedoston on varmistettava, että se on [SystemD käynnistyspalvelun mukaisesti](##SystemD_startup_konfigurointi) `rasplaser.service` tiedostossa- määritettyyn tiedostosijainnin mukaisesti. Muuten ohjelma vain käynnisty ja ei tee mitään. 
+ 
+![Tiedostopolku kuvankaappaus](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/tiedostopolku.png)
+ 
 
+## Tiedostopolun määrittely
 Tiedostopolun määrittelyn jälkeen on luotava kirjautumiskredentiaalit. Ohjelma lukee tiedoston johon on kirjattu MariaDB:lle luodut käyttäjätilitiedot `user` ja `password`. 
  
 Myös luetaan tiedostosta tietokannan IP-osoite `host` esimerkiksi `192.168.0.21` tai jos Raspberry PI:n omaan MariaDB tietokantaan, niin `localhost`. Tietokannan `port` on vakiona `3306` ja lopuksi määritetään `database` eli tietokanta, johon yhteys muodostetaan. Esimerkissä luotiin tietokanta `db_esimerkki`.
