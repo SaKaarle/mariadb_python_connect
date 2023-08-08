@@ -379,7 +379,7 @@ Alla on esimerkki tiedostosta `userconf.json`:
 Tämän `userconf.json` tiedosto luonnin jälkeen on hyvä varmistaa, että ohjelmakoodi lukee oikean tiedoston saadakseen yhteyden MariaDB -tietokantaan.
 Kuvassa on esimerkki, missä pystytään tarkistamaan minkä tiedoston ohjelma lukee.
  
-![userconf kredentiaalitiedosto](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/userconf%20kredentiaalit%20ja%20tiedostopolku.png)
+![userconf kredentiaalitiedosto](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/MariaDB%20connect.png)
  
 Kuvassa ohjelma lukee `jsonPath` määritetystä tiedostopolusta `userconf24.json` -tiedoston. 
 
