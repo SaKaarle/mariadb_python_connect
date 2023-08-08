@@ -330,11 +330,33 @@ Python koodi tarvitsee muutoksia, jotka on `mariadbCon.py` -tiedostoon merkitty 
 ![Selitys visuaalisesti mikä on kommentti.](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/T%C3%A4m%C3%A4%20on%20kommentti.png)
  
 Risuaita rivinalussa on kommentti, jota ohjelma ei pysty lukemaan. Sinne voidaan kirjoittaa mitä vain eikä se häiritse ohjelman suorittamista.
+
+Raspberry Pi:n GPIO pinnit selitettynä.
  
-Esimerkkikuva:
 ![Pinni taulukko Raspberry PI:lle selitettynä](https://cdn.sparkfun.com/assets/learn_tutorials/1/5/9/5/GPIO.png)
 
+Tässä Python ohjelmassa ovat GPIO pinnit 23, 24 ja 25 ovat valittuna. Pinnit ovat järjestysluvuiltaan 16, 18 ja 22. Näihin kytketään kolme kytkintä joilla kerätään tuotantolaitteesta dataa.
 
+| 23 | 24 | 25 |
+|---|---|---|
+|Laseri päällä|Laite on IDLE -tilassa|Laite on päällä|
+ 
+## Muutoksia ohjelmakoodiin
+
+Tiedostopolun määrittelyn jälkeen on luotava kirjautumiskredentiaalit. Ohjelma lukee tiedoston johon on kirjattu MariaDB:lle luodut käyttäjätilitiedot `user` ja `password`. 
+ 
+Myös luetaan tiedostosta tietokannan IP-osoite `host` esimerkiksi `192.168.0.21` tai jos Raspberry PI:n omaan MariaDB tietokantaan, niin `localhost`. Tietokannan `port` on vakiona `3306` ja lopuksi määritetään `database` eli tietokanta, johon yhteys muodostetaan. Esimerkissä luotiin tietokanta `db_esimerkki`.
+ 
+Alla on esimerkki tiedostosta `userconf.json`:
+``` 
+{
+    "user": "käyttäjänimi",
+    "password": "käyttäjänsalasana",
+    "host": "192.168.0.21",
+    "port": 3306,
+    "database": "db_esimerkki"
+}
+```
 
 # Havaitut virheet ja ongelmatilanteet
 
