@@ -115,15 +115,16 @@ class mainClass():
 ## Connect To MariaDB using JSON -file
 ##==================================================
 ##
-## Koodi virheellinen, keksittävä "Jos Virhe, Ota yhteys lokaaliin" jne...
-##
-## Tämä osio on turha. Yritetty luoda lukua JSON tiedostosta ja sen epäonnistutta, otetaan yhteys localhost:iin
-## eikä määritettyyn MariaDB osoitteeseen. Päivitetään tulevaisuudessa mahdollisesti. 
-## Funktiossa "def ConnectLocalMariaDB(self)" alempana tehdään muutokset tiedstonavaus osioo. 
+## Tiedoston polku on määritetty "jsonPath" avulla. Nyt on avattava kirjautumiskredentiaalit,
+## jotka on tallennettuna suoraan tässä esimerkissä "userconfHome.json" -tiedostoon.
+## GitHub julkaisussa on esimerkki kirjautumiskredentiaalin muodosta kuinka ne määritetään.
+## Funktiossa "def onnectMariaDBJSON(self)" Otetaan yhteys MariaDB tietokantaan lukemalla "userconfHome.json" -tiedosto.
 
     def ConnectMariaDBJSON(self):
         try:
-            with open(f"{jsonPath}userconf24.json",'r') as loginData:
+            ## Muista tarkistaa jsonPath -tiedostopolku sekä vaihtaa tarvittaessa avattava JSON -tiedosto.
+            ## Luetaan MariaDB kirjautumiskredentiaalit. 
+            with open(f"{jsonPath}userconfHome.json",'r') as loginData:
                 self.loginSettings = json.load(loginData)
                 try:
                     print("Testing connection to Server MariaDB...")
@@ -131,7 +132,7 @@ class mainClass():
                     self.connParams = {
                         "user":self.loginSettings["user"],
                         "password":self.loginSettings["password"],
-                        "host":"localhost",
+                        "host":self.loginSettings["host"],
                         "port":self.loginSettings["port"],
                         "database":self.loginSettings["database"]}
 
@@ -166,14 +167,16 @@ class mainClass():
 ## Connect To MariaDB using JSON -file + localhost
 ##==================================================
 ## Tiedoston polku on määritetty "jsonPath" avulla. Nyt on avattava kirjautumiskredentiaalit,
-## jotka on tallennettuna suoraan tässä esimerkissä "userconf24.json" -tiedostoon.
+## jotka on tallennettuna suoraan tässä esimerkissä "userconfHome.json" -tiedostoon.
 ## GitHub julkaisussa on esimerkki kirjautumiskredentiaalin muodosta kuinka ne määritetään.
+
+## Tässä funktiossa otetaan "Localhost" yhteys Raspberry Pi:n omaan MariaDB tietokantaan.
 
     def ConnectLocalMariaDB(self):
         try:
             ## Muista tarkistaa jsonPath -tiedostopolku sekä vaihtaa tarvittaessa avattava JSON -tiedosto.
             ## Luetaan MariaDB kirjautumiskredentiaalit. 
-            with open(f"{jsonPath}userconf24.json",'r') as loginData:
+            with open(f"{jsonPath}userconfHome.json",'r') as loginData:
                 self.loginSettings = json.load(loginData)
                 try:
                     print("Testing connection to Localhost MariaDB...")
@@ -215,17 +218,26 @@ class mainClass():
 # Kirjautumistiedoston luku ja kirjautuminen MariaDB serveriin #
 #================================================================
 
+## Koodi virheellinen, keksittävä "Jos Virhe, Ota yhteys lokaaliin" jne...
+##
+## Tämä osio on turha. Yritetty luoda lukua JSON tiedostosta ja sen epäonnistutta, otetaan yhteys localhost:iin
+## eikä määritettyyn MariaDB osoitteeseen. Päivitetään tulevaisuudessa mahdollisesti.
+## Se ottaa yhteyden def ConnectMariaDBJSON(self) funktioon määritetystä JSON tiedostosta. 
+
     def tryConnection(self):
         #if ConnectionSucc == True:
             #self.ConnectMariaDBJSON()
+            #self.ConnectLocalMariaDB()
             #self.laserDataRead(machine_id, start_time,end_time,duration, isFault)
         #el
         if connection_succ == False:
-            self.ConnectLocalMariaDB()
+            #self.ConnectLocalMariaDB()
+            self.ConnectMariaDBJSON()
             self.laserDataRead(machine_id, start_time,end_time,duration, isFault)
         else:
             print("error:",mariadb.Error)
             sys.exit()
+
 #================================================================
 ##### BACKUPSQL COMMAND #####
 #================================================================
@@ -236,7 +248,11 @@ class mainClass():
         buDate = dateTimeNowCall.strftime("%Y-%m-%d_%H%M%S")
         #Backup komento.
         # Tässä vakiona tallennetaan jsonPath tiedostopolkuun .SQL varmuuskopio. 
-        Popen([f"mysqldump -u SaKa -p{self.loginSettings['password']} esimDB > {jsonPath}database_backup{buDate}.sql"], stdout=PIPE,shell=True)
+        # HUOM! Varmista, että tietokannan nimi on oikein. Tässä tiedostossa "esimDB" on tietokanta. Muokkaamalla "esimDB" tekstiä
+        # voidaan määrittää oman tietokannan nimi, jotta SQL varmuuskopio onnistuu. 
+        # Alhaalla esimerkki:
+        # Popen([f"mysqldump -u{self.loginSettings['user']} -p{self.loginSettings['password']} db_esimerkki > {jsonPath}database_backup{buDate}.sql"], stdout=PIPE,shell=True)
+        Popen([f"mysqldump -u{self.loginSettings['user']} -p{self.loginSettings['password']} esimDB > {jsonPath}database_backup{buDate}.sql"], stdout=PIPE,shell=True)
         time.sleep(0.1)
 
 #================================================================
@@ -327,7 +343,7 @@ class mainClass():
         schedule.every().sunday.at("12:00").do(self.backupSQL).run
         schedule.every(4).hours.do(self.servuPing).run
         schedule.every(30).minutes.do(self.servuPing).run
-        #schedule.every(30).minutes.do(self.backupSQL).run
+        #schedule.every(1).minutes.do(self.backupSQL).run
         #schedule.every(1).minutes.do(self.servuPing).run
 
 

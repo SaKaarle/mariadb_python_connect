@@ -1,4 +1,4 @@
-userconf.json
+userconf1.json
 mariadbConBU.py
 switchRead.py
 userconf24.json
@@ -14,3 +14,5 @@ mariadbCon4release.py
 remoteGPIO.py
 database_backup2023-08-08_120400.sql
 testidbbackup2023-08-08_120000.sql
+database_backup2023-08-08_164954.sql
+database_backup2023-08-08_164854.sql
