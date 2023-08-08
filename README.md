@@ -36,6 +36,7 @@ Merkittävät muutokset julkaisuun
 - [Tavoitteet](#tavoitteet)
 - [Toimenpiteet](#toimenpiteet)
 - [Asennus ja käyttö](#asennus-ja-käyttö)
+- [Python ohjelman käyttö](#Python-ohjelman-käyttö)
 - [Havaitut virheet ja ongelmatilanteet](#HAVAITUT-VIRHEET-JA-ONGELMATILANTEET)
 - [Vaatimukset](#laserleikkurin-datan-keruu-ja-visualisointi)
 - [Tulokset](#tulokset)
@@ -236,7 +237,8 @@ Crontab on yksinkertainen vaihtoehto laittamaan palveluita käyntiin laitteen k�
 Tässä esimerkissä tein Raspberry Pi OS:n natiiville SystemD palvelulle käynnistyskäskyt.
 
 ## SystemD startup konfigurointi
-[SystemD config example](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/Putty%20Sudo%20Nano%20ikkuna.png)
+![SystemD config example](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/Putty%20Sudo%20Nano%20ikkuna.png)
+
 Jos jostain syystä ei ole asennettuna `systemd` pakettia, se pystytään asentamaan komennolla: `sudo apt install libsystemd-dev` tälläisen paketinasennuksen jälkeen on suositeltavaa käynnistää laite uusiksi
 
 Terminaaliin kirjoitetaan komento, jolla luodaan oma "Service" laitteelle. 
@@ -260,6 +262,11 @@ ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
 [Install]
 WantedBy=multi-user.target
 ```
+
+HUOM!
+ 
+Kohta `ExecStart=` ja `/home/pi/Desktop/sshVSC/mariadbCon.py` on ohjelmakoodin sijainti. Varmista että sijainti on oikea ja olemassa laitteessa. Muuten sovellus ei tule käynnistymään
+ 
 
 Tämä on tällä hetkellä minulla toimiva rasplaser.service tiedosto. README:n lopusta löytyy eri vaihtoehtoja ja havaittuja virheitä ja korjausehdotuksia.
  
@@ -321,9 +328,65 @@ Apr 25 10:30:28 rpi3B systemd[1]: Started Python Script LaserMachine.
 
 ```
 
+# Python ohjelman käyttö
+
+[Tiedosto mariadbCon.py](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/mariadbCon.py) on ladattavissa ja siirrettävissä käyttöönottoa varten määritettyyn kansioon, kuten SystemD esimerkissäni olen käyttänyt `/home/pi/Desktop/sshVSC/mariadbCon.py` osoitetta.
+Python koodi tarvitsee muutoksia, jotka on `mariadbCon.py` -tiedostoon merkitty `#` -kommentteina.
+ 
+![Selitys visuaalisesti mikä on kommentti.](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/T%C3%A4m%C3%A4%20on%20kommentti.png)
+ 
+Risuaita rivinalussa on kommentti, jota ohjelma ei pysty lukemaan. Sinne voidaan kirjoittaa mitä vain eikä se häiritse ohjelman suorittamista.
+
+Raspberry Pi:n GPIO pinnit selitettynä.
+ 
+![Pinni taulukko Raspberry PI:lle selitettynä](https://cdn.sparkfun.com/assets/learn_tutorials/1/5/9/5/GPIO.png)
+
+Tässä Python ohjelmassa ovat GPIO pinnit 23, 24 ja 25 ovat valittuna. Pinnit ovat järjestysluvuiltaan 16, 18 ja 22. Näihin kytketään kolme kytkintä joilla kerätään tuotantolaitteesta dataa.
+
+| 23 | 24 | 25 |
+|---|---|---|
+|Laseri päällä|Laite on IDLE -tilassa|Laite on päällä|
+ 
+## Muutoksia ohjelmakoodiin
+ 
+Ohjelmakoodiin on määritettävä muutoksia saadakseen se toimivaksi omaan käyttöön. Lataamalla ja siirtämällä `mariadbCon.py` -tiedoston on varmistettava, että se on [SystemD käynnistyspalvelun mukaisesti](#SystemD-startup-konfigurointi) `rasplaser.service` määritetyssä tiedostopolussa. Muuten ohjelma vain käynnisty ja ei tee mitään. Tätä polkua voidaan muokata omaan haluttuun sijantiin ja on tehtävät tarvittavat muutokset sovelluksen toimivuudeksi.
+ 
+
+## Tiedostopolun määrittely
+ 
+Python ohjelmassa on rivillä 69 määritetty tiedostopolku alla olevan kuvanmukaisesti:
+ 
+![Tiedostopolku kuvankaappaus](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/tiedostopolku.png)
+ 
+## Käyttäjätilikredentiaalit JSON tiedostoon
+ 
+Tiedostopolun määrittelyn jälkeen on luotava kirjautumiskredentiaalit. Luodaan JSON -tiedosto esimerkiksi `userconf.json`. Tekstitiedostoa muokkaamalla pystytään lisäämään `userconf.json` tiedostoon kirjautumiskredentiaalit, jonka ohjelma lukee kirjautuakseen sisään määritettyyn MariaDB -tietokantaan.
+ 
+Tekstitiedostoon lisätään käyttäjätilitiedot `user` ja `password`.
+Myös luetaan tiedostosta tietokannan IP-osoite `host` esimerkiksi `192.168.0.21` tai jos Raspberry PI:n omaan MariaDB tietokantaan, niin `localhost`. Tietokannan `port` on vakiona `3306` ja lopuksi määritetään `database` eli tietokanta, johon yhteys muodostetaan. Esimerkissä luotiin tietokanta `db_esimerkki`.
+ 
+Alla on esimerkki tiedostosta `userconf.json`:
+``` 
+{
+    "user": "käyttäjänimi",
+    "password": "käyttäjänsalasana",
+    "host": "192.168.0.21",
+    "port": 3306,
+    "database": "db_esimerkki"
+}
+```
+ 
+Tämän `userconf.json` tiedosto luonnin jälkeen on hyvä varmistaa, että ohjelmakoodi lukee oikean tiedoston saadakseen yhteyden MariaDB -tietokantaan.
+Kuvassa on esimerkki, missä pystytään tarkistamaan minkä tiedoston ohjelma lukee.
+ 
+![userconf kredentiaalitiedosto](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/userconf%20kredentiaalit%20ja%20tiedostopolku.png)
+ 
+Kuvassa ohjelma lukee `jsonPath` määritetystä tiedostopolusta `userconf24.json` -tiedoston. 
+
+ 
 
 # Havaitut virheet ja ongelmatilanteet
-
+ 
 ## Palvelu ei käynnisty Raspberry Pi:n yhtyedessä
 -Tarkista verkkoyhteys, myös Wi-Fi yhteys jos langatonverkkoyhteys on käytössä.
 
