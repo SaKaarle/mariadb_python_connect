@@ -14,9 +14,13 @@ from subprocess import Popen, PIPE
 import schedule
 
 # Signals from machine
+# ![Pinni taulukko Raspberry PI:lle selitettynä](https://cdn.sparkfun.com/assets/learn_tutorials/1/5/9/5/GPIO.png)
+
+# Tässä koodissa GPIO pinnit 23, 24 ja 25 ovat valittuna. Pinnit ovat järjestysluvuiltaan 16, 18 ja 22.
 LASER_ON_SIGNAL = 23 #23
 MACHINE_STANDBY = 24 #24
 MACHINE_POWER_ON_SIGNAL= 25 #25
+
 # GPIO setup
 # input connected to 3,3v
 # Pull down resistor mode activated to get solid 0 reading
@@ -58,7 +62,10 @@ production_times = []
 alarms = []
 idletimes = []
 
-#File
+# ! ! Tiedoston polku ! !
+# Tämä määritetään, että pystytään nopeasti vaivatta määrittämään oma tiedoston polku
+# jsonPath = tiedosto polku
+# Tärkeä myös huomioida '/' alussa ja lopussa
 jsonPath = '/home/pi/Desktop/sshVSC/'
 jsonBackupFile = f"{jsonPath}jsonBackupMachine1.json"
 print(jsonBackupFile)
@@ -110,10 +117,13 @@ class mainClass():
 ##
 ## Koodi virheellinen, keksittävä "Jos Virhe, Ota yhteys lokaaliin" jne...
 ##
-## Tämä osio on turha. Yritetty luoda lukua JSON tiedostosta ja sen epäonnistutta, ottaa yhteys localhost:iin
+## Tämä osio on turha. Yritetty luoda lukua JSON tiedostosta ja sen epäonnistutta, otetaan yhteys localhost:iin
+## eikä määritettyyn MariaDB osoitteeseen. Päivitetään tulevaisuudessa mahdollisesti. 
+## Funktiossa "def ConnectLocalMariaDB(self)" alempana tehdään muutokset tiedstonavaus osioo. 
+
     def ConnectMariaDBJSON(self):
         try:
-            with open('/home/pi/Desktop/sshVSC/userconf24.json','r') as loginData:
+            with open(f"{jsonPath}userconf24.json",'r') as loginData:
                 self.loginSettings = json.load(loginData)
                 try:
                     print("Testing connection to Server MariaDB...")
@@ -155,10 +165,15 @@ class mainClass():
 ##==================================================
 ## Connect To MariaDB using JSON -file + localhost
 ##==================================================
+## Tiedoston polku on määritetty "jsonPath" avulla. Nyt on avattava kirjautumiskredentiaalit,
+## jotka on tallennettuna suoraan tässä esimerkissä "userconf24.json" -tiedostoon.
+## GitHub julkaisussa on esimerkki kirjautumiskredentiaalin muodosta kuinka ne määritetään.
 
     def ConnectLocalMariaDB(self):
         try:
-            with open('/home/pi/Desktop/sshVSC/userconf24.json','r') as loginData:
+            ## Muista tarkistaa jsonPath -tiedostopolku sekä vaihtaa tarvittaessa avattava JSON -tiedosto.
+            ## Luetaan MariaDB kirjautumiskredentiaalit. 
+            with open(f"{jsonPath}userconf24.json",'r') as loginData:
                 self.loginSettings = json.load(loginData)
                 try:
                     print("Testing connection to Localhost MariaDB...")
@@ -220,7 +235,8 @@ class mainClass():
         print("SQL Backup Created:", dateTimeNowCall)
         buDate = dateTimeNowCall.strftime("%Y-%m-%d_%H%M%S")
         #Backup komento.
-        Popen([f"mysqldump -u SaKa -p{self.loginSettings['password']} esimDB > /home/pi/Desktop/SQLBU/testidbbackup{buDate}.sql"], stdout=PIPE,shell=True)
+        # Tässä vakiona tallennetaan jsonPath tiedostopolkuun .SQL varmuuskopio. 
+        Popen([f"mysqldump -u SaKa -p{self.loginSettings['password']} esimDB > {jsonPath}database_backup{buDate}.sql"], stdout=PIPE,shell=True)
         time.sleep(0.1)
 
 #================================================================
@@ -262,7 +278,7 @@ class mainClass():
             isFaultMode = "LASER"
         
         print(f"Starting measuring {isFaultMode} mode.\nStarting time: "+str(self.start_time.strftime("%H:%M:%S")))
-        time.sleep(0.2)
+        time.sleep(0.1)
         
 
 #================================================================
@@ -288,7 +304,7 @@ class mainClass():
             print(datakey,":",datavalue)
         self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
         #self.start_time = datetime.now()
-        time.sleep(0.2)
+        time.sleep(0.1)
         
 
 #================================================================
@@ -304,7 +320,8 @@ class mainClass():
         global power_on
 
 
-        #Määritetty backup tiedoston ajankohdat
+        #Määritetty varmuuskopio tiedoston ajankohdat sekä servun herätys (self.servuPing).run -kohdassa. 
+
         schedule.every().day.at("12:00").do(self.backupSQL).run
         schedule.every().day.at("12:00").do(self.servuPing).run
         schedule.every().sunday.at("12:00").do(self.backupSQL).run
@@ -417,7 +434,7 @@ class mainClass():
                         self.startMeasuringTimer(machine_id, start_time, end_time, duration, isFault)
                         
                 schedule.run_pending()
-                time.sleep(0.2)
+                time.sleep(0.1)
 
         except KeyboardInterrupt:
             print("------------------")

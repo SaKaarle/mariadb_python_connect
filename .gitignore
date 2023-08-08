@@ -12,3 +12,5 @@ mariadbCon_backup.py
 mariadbCon_backup2.py
 mariadbCon4release.py
 remoteGPIO.py
+database_backup2023-08-08_120400.sql
+testidbbackup2023-08-08_120000.sql
