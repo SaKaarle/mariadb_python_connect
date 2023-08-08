@@ -381,7 +381,7 @@ Kuvassa on esimerkki, missä pystytään tarkistamaan minkä tiedoston ohjelma l
  
 ![userconf kredentiaalitiedosto](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/MariaDB%20connect.png)
  
-Kuvassa ohjelma lukee `jsonPath` määritetystä tiedostopolusta `userconf24.json` -tiedoston. 
+Kuvassa ohjelma lukee `jsonPath` määritetystä tiedostopolusta `userconfHome.json` -tiedoston. Tämä pitää varmistaa, että yhteys onnistuu halutulle MariaDB -tietokannalle
 
  
 
