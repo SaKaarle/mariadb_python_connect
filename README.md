@@ -357,9 +357,12 @@ Ohjelmakoodiin on määritettävä muutoksia saadakseen se toimivaksi omaan käy
 Python ohjelmassa on rivillä 69 määritetty tiedostopolku alla olevan kuvanmukaisesti:
  
 ![Tiedostopolku kuvankaappaus](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/tiedostopolku.png)
-
-Tiedostopolun määrittelyn jälkeen on luotava kirjautumiskredentiaalit. Ohjelma lukee tiedoston johon on kirjattu MariaDB:lle luodut käyttäjätilitiedot `user` ja `password`. 
  
+## Käyttäjätilikredentiaalit JSON tiedostoon
+ 
+Tiedostopolun määrittelyn jälkeen on luotava kirjautumiskredentiaalit. Luodaan JSON -tiedosto esimerkiksi `userconf.json`. Tekstitiedostoa muokkaamalla pystytään lisäämään `userconf.json` tiedostoon kirjautumiskredentiaalit, jonka ohjelma lukee kirjautuakseen sisään määritettyyn MariaDB -tietokantaan.
+ 
+Tekstitiedostoon lisätään käyttäjätilitiedot `user` ja `password`.
 Myös luetaan tiedostosta tietokannan IP-osoite `host` esimerkiksi `192.168.0.21` tai jos Raspberry PI:n omaan MariaDB tietokantaan, niin `localhost`. Tietokannan `port` on vakiona `3306` ja lopuksi määritetään `database` eli tietokanta, johon yhteys muodostetaan. Esimerkissä luotiin tietokanta `db_esimerkki`.
  
 Alla on esimerkki tiedostosta `userconf.json`:
@@ -372,9 +375,18 @@ Alla on esimerkki tiedostosta `userconf.json`:
     "database": "db_esimerkki"
 }
 ```
+ 
+Tämän `userconf.json` tiedosto luonnin jälkeen on hyvä varmistaa, että ohjelmakoodi lukee oikean tiedoston saadakseen yhteyden MariaDB -tietokantaan.
+Kuvassa on esimerkki, missä pystytään tarkistamaan minkä tiedoston ohjelma lukee.
+ 
+![userconf kredentiaalitiedosto](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/userconf%20kredentiaalit%20ja%20tiedostopolku.png)
+ 
+Kuvassa ohjelma lukee `jsonPath` määritetystä tiedostopolusta `userconf24.json` -tiedoston. 
+
+ 
 
 # Havaitut virheet ja ongelmatilanteet
-
+ 
 ## Palvelu ei käynnisty Raspberry Pi:n yhtyedessä
 -Tarkista verkkoyhteys, myös Wi-Fi yhteys jos langatonverkkoyhteys on käytössä.
 
