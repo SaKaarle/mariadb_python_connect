@@ -263,6 +263,11 @@ ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
 WantedBy=multi-user.target
 ```
 
+HUOM!
+ 
+Kohta `ExecStart=` ja `/home/pi/Desktop/sshVSC/mariadbCon.py` on ohjelmakoodin sijainti. Varmista että sijainti on oikea ja olemassa laitteessa. Muuten sovellus ei tule käynnistymään
+ 
+
 Tämä on tällä hetkellä minulla toimiva rasplaser.service tiedosto. README:n lopusta löytyy eri vaihtoehtoja ja havaittuja virheitä ja korjausehdotuksia.
  
 
