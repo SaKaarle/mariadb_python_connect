@@ -238,6 +238,7 @@ Tässä esimerkissä tein Raspberry Pi OS:n natiiville SystemD palvelulle käynn
 
 ## SystemD startup konfigurointi
 ![SystemD config example](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/kuvat/Putty%20Sudo%20Nano%20ikkuna.png)
+
 Jos jostain syystä ei ole asennettuna `systemd` pakettia, se pystytään asentamaan komennolla: `sudo apt install libsystemd-dev` tälläisen paketinasennuksen jälkeen on suositeltavaa käynnistää laite uusiksi
 
 Terminaaliin kirjoitetaan komento, jolla luodaan oma "Service" laitteelle. 
