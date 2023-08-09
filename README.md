@@ -255,7 +255,7 @@ Palvelu tiedostoon `rasplaser.service` lisätään seuraavat komennot:
 [Unit]
 #Human readable name of the unit
 Description=Python Script LaserMachine
-After=multi-user.target
+After=network.target multi-user.target
 [Service]
 User=pi
 Type=idle
@@ -394,7 +394,65 @@ Kuvassa ohjelma lukee `jsonPath` määritetystä tiedostopolusta `userconfHome.j
 
 ## Palvelu ei käynnisty laitteen käynnistyksen yhteydessä, mutta käynnistyy `sudo systemctl restart omapalvelu.service` jälkeen.
 
-Tässä on iso selvitys tehty:
+
+Tähän ongelmaan voi olla monta selitystä ja ratkaisuja.
+
+### Tarkista käynnistysprioriteetti
+
+Ensimmäisenä testasin `sudo systemctl status rasplaser.service` komentoa tarkastaakseni ohjelman statuksen. Kaikki vaikutti hyvältä ja terminaali palautti tekstin:
+
+```
+pi@rpi3B:~ $ sudo systemctl status rasplaser.service
+● rasplaser.service - Python Script LaserMachine
+     Loaded: loaded (/lib/systemd/system/rasplaser.service; enabled; vendor preset: enabled)
+     Active: active (running) since Wed 2023-08-09 12:11:49 EEST; 2min 9s ago
+   Main PID: 725 (python)
+      Tasks: 1 (limit: 1629)
+        CPU: 544ms
+     CGroup: /system.slice/rasplaser.service
+             └─725 /usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py
+```
+
+Mitään ongelmaa ei ole havaittavissa ja palvelu pyörii aktiivisesti. Mutta käännettyäni kytkimen asentoa ja syöttämällä terminaaliin uudelleen
+`sudo systemctl status rasplaser.service` ilmestyy ongelma: 
+
+```
+pi@rpi3B:~ $ sudo systemctl status rasplaser.service
+● rasplaser.service - Python Script LaserMachine
+     Loaded: loaded (/lib/systemd/system/rasplaser.service; enabled; vendor preset: enabled)
+     Active: failed (Result: exit-code) since Wed 2023-08-09 12:14:21 EEST; 6s ago
+    Process: 725 ExecStart=/usr/bin/python /home/pi/Desktop/sshVSC/mariadbCon.py (code=exited, status=1/FAILURE)
+   Main PID: 725 (code=exited, status=1/FAILURE)
+        CPU: 645ms
+
+Aug 09 12:14:21 rpi3B python[725]:     self.laserDataRead(machine_id, start_time,end_time,duration, isFault)
+Aug 09 12:14:21 rpi3B python[725]:   File "/home/pi/Desktop/sshVSC/mariadbCon.py", line 405, in laserDataRead
+Aug 09 12:14:21 rpi3B python[725]:     self.stopMeasuringTimer(machine_id, start_time, end_time, duration, isFa>
+Aug 09 12:14:21 rpi3B python[725]:   File "/home/pi/Desktop/sshVSC/mariadbCon.py", line 321, in stopMeasuringTi>
+Aug 09 12:14:21 rpi3B python[725]:     self.dataSendDb(machine_id, start_time, end_time, duration, isFault)
+Aug 09 12:14:21 rpi3B python[725]:   File "/home/pi/Desktop/sshVSC/mariadbCon.py", line 106, in dataSendDb
+Aug 09 12:14:21 rpi3B python[725]:     self.conn.commit()
+Aug 09 12:14:21 rpi3B python[725]: AttributeError: 'mainClass' object has no attribute 'conn'
+Aug 09 12:14:21 rpi3B systemd[1]: rasplaser.service: Main process exited, code=exited, status=1/FAILURE
+Aug 09 12:14:21 rpi3B systemd[1]: rasplaser.service: Failed with result 'exit-code'.
+```
+
+Virhe:
+`AttributeError: 'mainClass' object has no attribute 'conn'`
+
+Tästä on vaikea päätellä mikä olisi ongelmana. Tarkistamalla Raspberry Pi:lle luodoun `rasplaser.service` SystemD käynnistyslogiikka, voidaan päätellä että verkkoyhteys ongelma tai yhteydessä vikaa kun ollaan määritetty IP-osoitteet ja kredentiaalit.
+
+Avattuani `sudo nano /lib/systemd/system/rasplaser.service` komennolla palvelun auki, tarkistin seuraavan osion:
+``` 
+[Unit]
+##Human readable name of the unit
+Description=Python Script LaserMachine
+After=network.target multi-user.target
+```
+`[Unit]` alueelta minulta puuttui `After` kohdasta `network.target` joka odottaa verkonkäynnistymistä, ennen kuin se aloittaa palvelun. Korjattuani asian, Raspberry Pi odottaa network palvelun käynnistystä, kun se voi käynnistää `rasplaser.service`:n.
+
+ 
+### Oikeuksien tarkistaminen
 
 ```
 [Unit]
@@ -403,7 +461,7 @@ Description=Python Script LaserMachine
 After=network.target multi-user.target
 
 [Service]
-#User=root
+User=root
 Type=idle
 ExecStart=/usr/bin/python3 -u /home/pi/Desktop/sshVSC/mariadbCon.py
 WorkingDirectory=/home/pi/Desktop/sshVSC
@@ -413,19 +471,21 @@ RestartSec=10
 [Install]
 WantedBy=multi-user.target
 ```
- 
+
 Kokemuksellani, `User=pi` ei aina löydä paketteja, joten voidaan vaihtoehtoisesti käyttää `User=root` käyttäjää
 Myös monen ongelmatilanteen jälkeen huomattiin, että lisäämällä rasplaser.service tiedostoon `Restart=on-failure` ja `WorkingDirectory=/home/pi/jokinsijainti` saadaan käynnistys toimimaan. Muista lähteistä löytyy hyvät ohjeet lisätä python skripti ja tärkeät tiedostot "järjestelmän" kansioihin, ettei tarvitse välittää `chmod 755` tai muista oikeuksien lisäämisestä.
  
 Näiden lisäksi, [Python pakettien](https://pypi.org/) asennuksia voidaan joutua suorittamaan uudelleen. Paketit saattavat "kadota" tai "hukkua" käyttöoikeuksista JOS käytetään `User=root` käyttäjää palvelukonfiguraatiossa. Uudelleen asennukset on suositeltavaa tehdä `sudo`:lla saadakseen pääkäyttäjä oikeudet ja `python3`:lla varmistetaan että asennetaan oikealle Python versiolle paketit. Esimerkki komento terminaaliin: `sudo python3 -m pip install [package-name]`
  
 Minulle ilmeni vastaavia ongelmia ja tiedä tarkempia syitä, mitkä tekijät ovat tuoneet nämä viat vastaan. Tälläisissä projekteissa on myös suotavaa rakentaa `venv` eli [virtuaali ympäristö](https://docs.python.org/3/library/venv.html) jonne asennetaan omat halutut ja tarvittavat paketit, sekä `rasplaser.service` tiedostoon määritetään sijainti mistä tämä sovellus ajetaan hyödyntäen virtuaali ympäristöä. Tässäkin tapauksessa, jos on syötetty arvot `User=root` palvelutiedostoon, on tärkeä myöntää kansiolle `chmod 755` kirjoitus- ja lukuoikeudet.
+
+### NetworkManager vs. dhcpcd
  
 ```
 [Unit]
 #Human readable name of the unit
 Description=Python Script LaserMachine
-After=multi-user.target
+After=network.target multi-user.target
 [Service]
 User=pi
 Type=idle
