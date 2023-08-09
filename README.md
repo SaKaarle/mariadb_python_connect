@@ -25,6 +25,7 @@ Merkittävät muutokset julkaisuun
 |---|---|---|
 |21.6.2023|Versio 1.0 julkaisu|Saku Kaarlejärvi|
 |21.6.2023|Zenodo julkaisu|Saku Kaarlejärvi|
+|8.8.2023|Versio 1.1 julkaisu|Saku Kaarlejärvi|
 
 # Sisällysluettelo
 - [Julkaisun nimi](#laserleikkurin-datan-keruu-ja-visualisointi)
@@ -375,7 +376,8 @@ Alla on esimerkki tiedostosta `userconf.json`:
     "database": "db_esimerkki"
 }
 ```
- 
+
+Tiedoston voi ladata [täältä.](https://github.com/SaKaarle/tehodata-lasercuttingmachine-data-collection/blob/master/userconf.json)
 Tämän `userconf.json` tiedosto luonnin jälkeen on hyvä varmistaa, että ohjelmakoodi lukee oikean tiedoston saadakseen yhteyden MariaDB -tietokantaan.
 Kuvassa on esimerkki, missä pystytään tarkistamaan minkä tiedoston ohjelma lukee.
  
