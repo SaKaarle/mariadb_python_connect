@@ -25,7 +25,7 @@ Merkittävät muutokset julkaisuun
 |---|---|---|
 |21.6.2023|Versio 1.0 julkaisu|Saku Kaarlejärvi|
 |21.6.2023|Zenodo julkaisu|Saku Kaarlejärvi|
-|8.8.2023|Versio 1.1 julkaisu|Saku Kaarlejärvi|
+|9.8.2023|Versio 1.1 julkaisu|Saku Kaarlejärvi|
 
 # Sisällysluettelo
 - [Julkaisun nimi](#laserleikkurin-datan-keruu-ja-visualisointi)
