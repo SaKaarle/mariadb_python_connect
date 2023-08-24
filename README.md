@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/676489390.svg)](https://zenodo.org/badge/latestdoi/676489390)
+[![DOI](https://zenodo.org/badge/534218525.svg)](https://zenodo.org/badge/latestdoi/534218525)
 
 
 ![Älykkäät teknologiat](https://storage.googleapis.com/seamk-production/2022/04/2b1d63e0-alykkaat-teknologiat_highres_2022-768x336.jpg)
